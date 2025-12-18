@@ -1,3 +1,4 @@
+// layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -19,13 +20,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="fr" className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`
+          ${geistSans.variable} 
+          ${geistMono.variable}
+          min-h-screen
+          bg-[radial-gradient(900px_500px_at_15%_10%,#dcfce7_0%,transparent_60%),linear-gradient(#f7f6f2,#f7f6f2)]
+          text-emerald-950
+          antialiased
+        `}
       >
         {children}
       </body>
