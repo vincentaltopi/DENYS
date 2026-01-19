@@ -1,17 +1,27 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes validatedPulse {
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(16, 185, 129, 0);
+  }
+  30% {
+    box-shadow: inset 0 0 0 9999px rgba(16, 185, 129, 0.15);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(16, 185, 129, 0);
   }
 }
 
+.animate-validated {
+  animation: validatedPulse 0.6s ease-out;
+}
+
+/* Base safe: ne casse pas Tailwind, laisse le layout aux pages/layout.tsx */
 html,
 body {
   height: 100%;
@@ -19,6 +29,155 @@ body {
 
 body {
   margin: 0;
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  color: rgb(6 78 59); /* emerald-950 */
+  /* plus de flex centré / overflow hidden / fond dark */
+}
+
+/* ------------------------------------------------------------------ */
+/* Compat: si certaines pages utilisent encore tes anciennes classes */
+/* on les remappe sur le style pro/écolo                               */
+/* ------------------------------------------------------------------ */
+
+.app-container {
+  min-height: 100vh;
+  width: 100%;
+  padding: 2.5rem 1.5rem; /* px-6 py-10 */
+  box-sizing: border-box;
+  display: block; /* plus de flex centré global */
+  color: rgb(6 78 59); /* emerald-950 */
+  /* Fond "papier" cohérent partout si une page utilise app-container */
+  background:
+    radial-gradient(900px 500px at 15% 10%, #dcfce7 0%, transparent 60%),
+    linear-gradient(#f7f6f2, #f7f6f2);
+}
+
+.main-card-wrapper {
+  max-width: 48rem; /* ~max-w-3xl */
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem;
+  border-radius: 1rem; /* rounded-2xl approx */
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(6, 78, 59, 0.10);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(6px);
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+
+.main-title {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgb(6 78 59);
+}
+
+.action-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(6, 78, 59, 0.70);
+  line-height: 1.6;
+}
+
+.action-card {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(6, 78, 59, 0.10);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: block;
+}
+
+/* Boutons legacy */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem; /* rounded-xl */
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.button:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.20);
+}
+
+/* Primary (login) = vert */
+.button.login {
+  background: #065f46; /* emerald-800 */
+  color: #ffffff;
+}
+
+.button.login:hover {
+  background: #064e3b; /* emerald-900 */
+  transform: translateY(-1px);
+}
+
+/* Secondary default */
+.button:not(.login):not(.logout) {
+  background: rgba(255, 255, 255, 0.85);
+  color: rgba(6, 78, 59, 0.85);
+  border: 1px solid rgba(6, 78, 59, 0.15);
+}
+
+.button:not(.login):not(.logout):hover {
+  background: rgba(220, 252, 231, 0.35);
+}
+
+/* Logout = secondaire (discret), pas rouge agressif */
+.button.logout {
+  background: rgba(255, 255, 255, 0.85);
+  color: rgba(6, 78, 59, 0.85);
+  border: 1px solid rgba(6, 78, 59, 0.15);
+}
+
+.button.logout:hover {
+  background: rgba(220, 252, 231, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Profile legacy */
+.profile-card {
+  padding: 1rem;
+}
+.profile-picture {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+.profile-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0.25rem 0 0 0;
+}
+.profile-email {
+  font-size: 0.8rem;
+  margin: 0;
+  color: rgba(6, 78, 59, 0.65);
+}
+
+/* Animations: on garde */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Responsive léger */
+@media (max-width: 600px) {
+  .app-container {
+    padding: 1.5rem 1rem;
+  }
+  .main-card-wrapper {
+    padding: 1.25rem;
+  }
 }
