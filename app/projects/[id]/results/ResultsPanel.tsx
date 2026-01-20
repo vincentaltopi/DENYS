@@ -62,8 +62,7 @@ function isMonetary(r: any) {
 function isDefaultAssurance(r: any) {
   const v = r?.associated_q;
   return (
-    String(v ?? "").toLocaleLowerCase() === "fe assurance" ||
-    String(v ?? "").toLocaleLowerCase() === "FE Assurance"
+    String(v ?? "").toLocaleLowerCase() === "fe assurance" 
   );
 }
 
@@ -160,7 +159,7 @@ function SubcatEmissionsTooltip({
 
   return (
     <div className="rounded-xl border border-emerald-950/10 bg-white px-3 py-2 shadow-sm">
-      <div className="text-xs font-semibold text-emerald-950/80">{name}</div>
+      <div className="text-xs font-normal text-emerald-950/80">{name}</div>
 
       <div className="mt-1 text-xs text-emerald-950/70">
         <span className="font-medium">
@@ -201,7 +200,7 @@ function EmissionsDonutTooltip({
 
   return (
     <div className="rounded-xl border border-emerald-950/10 bg-white px-3 py-2 shadow-sm">
-      <div className="text-xs font-semibold text-emerald-950/80">{name}</div>
+      <div className="text-xs font-normal text-emerald-950/80">{name}</div>
       <div className="mt-1 text-xs text-emerald-950/70">
         <span className="font-medium">{kg.toLocaleString("fr-FR")}</span> kgCO2e
         {!Number.isNaN(percent) && (
@@ -237,7 +236,7 @@ function DonutTooltip({
 
   return (
     <div className="rounded-xl border border-emerald-950/10 bg-white px-3 py-2 shadow-sm">
-      <div className="text-xs font-semibold text-emerald-950/80">{name}</div>
+      <div className="text-xs font-normal text-emerald-950/80">{name}</div>
       <div className="mt-1 text-xs text-emerald-950/70">
         <span className="font-medium">{value.toLocaleString("fr-FR")}</span>{" "}
         lignes
@@ -353,7 +352,7 @@ function EcoDonut({
   if (rightLegend) {
     return (
       <div className="rounded-2xl border border-emerald-950/10 bg-white p-4">
-        <div className="mb-1 text-sm font-semibold text-emerald-950/80">{title}</div>
+        <div className="mb-1 text-sm font-normal text-emerald-950/80">{title}</div>
         {subtitle && <div className="mb-3 text-xs text-emerald-950/60">{subtitle}</div>}
 
         <div className="flex items-center gap-20">
@@ -364,11 +363,11 @@ function EcoDonut({
                 <div className="text-[11px] font-medium text-emerald-950/55">{centerLabel}</div>
 
                 {total > 0 ? (
-                  <div className="text-xl font-semibold leading-none text-emerald-950/85">
+                  <div className="text-xl font-normal leading-none text-emerald-950/85">
                     {totalDisplay}
                   </div>
                 ) : (
-                  <div className="text-sm font-semibold text-emerald-950/60">
+                  <div className="text-sm font-normal text-emerald-950/60">
                     Aucune émission
                   </div>
                 )}
@@ -414,7 +413,7 @@ function EcoDonut({
   // ---- Mode normal
   return (
     <div className="overflow-hidden rounded-2xl border border-emerald-950/10 bg-white p-4">
-      <div className="mb-1 text-sm font-semibold text-emerald-950/80">{title}</div>
+      <div className="mb-1 text-sm font-normal text-emerald-950/80">{title}</div>
       {subtitle && <div className="mb-3 text-xs text-emerald-950/60">{subtitle}</div>}
 
       <div className="flex flex-col">
@@ -424,11 +423,11 @@ function EcoDonut({
               <div className="mt-0.5 text-[11px] font-medium text-emerald-950/55">{centerLabel}</div>
 
               {total > 0 ? (
-                <div className="text-xl font-semibold leading-none text-emerald-950/90">
+                <div className="text-xl font-normal leading-none text-emerald-950/90">
                   {totalDisplay}
                 </div>
               ) : (
-                <div className="text-sm font-semibold text-emerald-950/60">
+                <div className="text-sm font-normal text-emerald-950/60">
                   Aucune émission
                 </div>
               )}
@@ -506,6 +505,8 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
   const [rows, setRows] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAllCats, setShowAllCats] = useState(false);
+
   
 
   useEffect(() => {
@@ -797,6 +798,104 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
     };
   }, [rows]);
 
+  type CatKey =
+    | "achat"
+    | "locMat"
+    | "locVeh"
+    | "presta"
+    | "assurance"
+    | "energie"
+    | "fret"
+    | "annexe";
+
+  type DonutCard = {
+    key: CatKey;
+    title: string;
+    totalKg: number;
+    lines: number;
+    data: PieDatum[];
+    colors: string[];
+  };
+
+  const categoryDonutCards = useMemo<DonutCard[]>(() => {
+    const cards: DonutCard[] = [
+      {
+        key: "achat",
+        title: "Achat matériel",
+        totalKg: piesByCategory.totalsKg.achat,
+        lines: piesByCategory.counts.achatTotal,
+        data: piesByCategory.pieAchat,
+        colors: [COLORS.emerald, COLORS.stone, COLORS.clay],
+      },
+      {
+        key: "locMat",
+        title: "Location matériel",
+        totalKg: piesByCategory.totalsKg.locMat,
+        lines: piesByCategory.counts.locMatTotal,
+        data: piesByCategory.pieLocMat,
+        colors: [COLORS.emerald, COLORS.clay],
+      },
+      {
+        key: "locVeh",
+        title: "Location de véhicule",
+        totalKg: piesByCategory.totalsKg.locVeh,
+        lines: piesByCategory.counts.locVehTotal,
+        data: piesByCategory.pieLocVeh,
+        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+      },
+      {
+        key: "presta",
+        title: "Prestation",
+        totalKg: piesByCategory.totalsKg.presta,
+        lines: piesByCategory.counts.prestaTotal,
+        data: piesByCategory.piePresta,
+        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+      },
+      {
+        key: "assurance",
+        title: "Assurance",
+        totalKg: piesByCategory.totalsKg.assurance,
+        lines: piesByCategory.counts.assuranceTotal,
+        data: piesByCategory.pieAssurance,
+        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+      },
+      {
+        key: "energie",
+        title: "Energie",
+        totalKg: piesByCategory.totalsKg.energie,
+        lines: piesByCategory.counts.energieTotal,
+        data: piesByCategory.pieEnergie,
+        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+      },
+      {
+        key: "fret",
+        title: "Fret",
+        totalKg: piesByCategory.totalsKg.fret,
+        lines: piesByCategory.counts.fretTotal,
+        data: piesByCategory.pieFret,
+        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+      },
+      {
+        key: "annexe",
+        title: "Annexe",
+        totalKg: piesByCategory.totalsKg.annexe,
+        lines: piesByCategory.counts.annexeTotal,
+        data: piesByCategory.pieAnnexe,
+        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+      },
+    ];
+
+    return cards
+      .filter((c) => c.lines > 0) 
+      .sort((a, b) => b.totalKg - a.totalKg); 
+  }, [piesByCategory]);
+
+  const shownCats = useMemo(
+    () => (showAllCats ? categoryDonutCards : categoryDonutCards.slice(0, 6)),
+    [categoryDonutCards, showAllCats]
+  );
+
+
   return (
     <div className="space-y-4">
       {error && (
@@ -832,7 +931,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
             <div className="relative rounded-2xl border border-emerald-950/10 overflow-visible">
               <div className="absolute inset-0 rounded-2xl bg-white overflow-hidden" />
               <div className="relative p-4">
-                <div className="mb-1 text-sm font-semibold text-emerald-950/80">
+                <div className="mb-1 text-sm font-normal text-emerald-950/80">
                   Part de FE monétaire (sur lignes valorisées)
                 </div>
                 <div className="text-xs text-emerald-950/60">
@@ -865,89 +964,38 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
       )}
 
       {/* Donuts catégories */}
-      {!loading && !error && rows.length > 0 && (
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          <EcoDonut
-            title="Achat matériel"
-            subtitle={`${piesByCategory.totalsKg.achat.toLocaleString("fr-FR")} kgCO2e • ${piesByCategory.counts.achatTotal} lignes`}
-            data={piesByCategory.pieAchat}
-            colors={[COLORS.emerald, COLORS.stone, COLORS.clay]}
-            centerLabel="Total"
-            unit="kgCO2e"
-            tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
-          />
+        {!loading && !error && rows.length > 0 && (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <div className="text-sm font-normal text-emerald-950/80">Détails par catégorie</div>
 
-          <EcoDonut
-            title="Location matériel"
-            subtitle={`${piesByCategory.totalsKg.locMat.toLocaleString("fr-FR")} kgCO2e • ${piesByCategory.counts.locMatTotal} lignes`}
-            data={piesByCategory.pieLocMat}
-            colors={[COLORS.emerald, COLORS.clay]}
-            centerLabel="Total"
-            unit="kgCO2e"
-            tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
-          />
+              {categoryDonutCards.length > 6 && (
+                <button
+                  className="text-xs font-medium text-emerald-700 hover:underline"
+                  onClick={() => setShowAllCats((v) => !v)}
+                >
+                  {showAllCats ? "Réduire" : "Voir tout"}
+                </button>
+              )}
+            </div>
 
-          <EcoDonut
-            title="Location de véhicule"
-            subtitle={`${piesByCategory.totalsKg.locVeh.toLocaleString("fr-FR")} kgCO2e • ${piesByCategory.counts.locVehTotal} lignes`}
-            data={piesByCategory.pieLocVeh}
-            colors={[COLORS.stone, COLORS.teal, COLORS.forest]}
-            centerLabel="Total"
-            unit="kgCO2e"
-            tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
-          />
+            <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
+              {shownCats.map((c) => (
+                <EcoDonut
+                  key={c.key}
+                  title={c.title}
+                  subtitle={`${c.totalKg.toLocaleString("fr-FR")} kgCO2e • ${c.lines} lignes`}
+                  data={c.data}
+                  colors={c.colors}
+                  centerLabel="Total"
+                  unit="kgCO2e"
+                  tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
-          <EcoDonut
-            title="Prestation"
-            subtitle={`${piesByCategory.totalsKg.presta.toLocaleString("fr-FR")} kgCO2e • ${piesByCategory.counts.prestaTotal} lignes`}
-            data={piesByCategory.piePresta}
-            colors={[COLORS.stone, COLORS.teal, COLORS.forest]}
-            centerLabel="Total"
-            unit="kgCO2e"
-            tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
-          />
-
-          <EcoDonut
-            title="Assurance"
-            subtitle={`${piesByCategory.totalsKg.assurance.toLocaleString("fr-FR")} kgCO2e • ${piesByCategory.counts.assuranceTotal} lignes`}
-            data={piesByCategory.pieAssurance}
-            colors={[COLORS.stone, COLORS.teal, COLORS.forest]}
-            centerLabel="Total"
-            unit="kgCO2e"
-            tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
-          />
-
-          <EcoDonut
-            title="Energie"
-            subtitle={`${piesByCategory.totalsKg.energie.toLocaleString("fr-FR")} kgCO2e • ${piesByCategory.counts.energieTotal} lignes`}
-            data={piesByCategory.pieEnergie}
-            colors={[COLORS.stone, COLORS.teal, COLORS.forest]}
-            centerLabel="Total"
-            unit="kgCO2e"
-            tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
-          />
-
-          <EcoDonut
-            title="Fret"
-            subtitle={`${piesByCategory.totalsKg.fret.toLocaleString("fr-FR")} kgCO2e • ${piesByCategory.counts.fretTotal} lignes`}
-            data={piesByCategory.pieFret}
-            colors={[COLORS.stone, COLORS.teal, COLORS.forest]}
-            centerLabel="Total"
-            unit="kgCO2e"
-            tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
-          />
-
-          <EcoDonut
-            title="Annexe"
-            subtitle={`${piesByCategory.totalsKg.annexe.toLocaleString("fr-FR")} kgCO2e • ${piesByCategory.counts.annexeTotal} lignes`}
-            data={piesByCategory.pieAnnexe}
-            colors={[COLORS.stone, COLORS.teal, COLORS.forest]}
-            centerLabel="Total"
-            unit="kgCO2e"
-            tooltipContent={(props: any) => <SubcatEmissionsTooltip {...props} unit="kgCO2e" />}
-          />
-        </div>
-      )}
     </div>
   );
 }

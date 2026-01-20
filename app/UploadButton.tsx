@@ -179,7 +179,7 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
   return (
     <div className="grid gap-4">
       <div className="rounded-2xl border border-emerald-950/10 bg-white/90 p-4 shadow-sm">
-        <label className="mb-2 block text-sm font-semibold text-emerald-950/80">
+        <label className="mb-2 block text-sm font-medium text-emerald-950/80">
           Fichier projet
         </label>
 
@@ -188,7 +188,7 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
             type="file"
             accept=".xlsx,.xls,.xlsb,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
             onChange={(e) => setProjectFile(e.target.files?.[0] ?? null)}
-            className="block w-full max-w-md rounded-xl border border-emerald-950/15 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-700 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-600/30"
+            className="block w-full max-w-md rounded-xl border border-emerald-950/15 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-700 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-600/30"
           />
 
           {projectFile && (
@@ -200,7 +200,7 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
       </div>
 
       <div className="rounded-2xl border border-emerald-950/10 bg-white/90 p-4 shadow-sm">
-        <label className="mb-2 block text-sm font-semibold text-emerald-950/80">
+        <label className="mb-2 block text-sm font-medium text-emerald-950/80">
           Fichier fournisseurs
         </label>
 
@@ -209,7 +209,7 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
             type="file"
             accept=".xlsx,.xls,.xlsb,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
             onChange={(e) => setSupplierFile(e.target.files?.[0] ?? null)}
-            className="block w-full max-w-md rounded-xl border border-emerald-950/15 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-700 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-600/30"
+            className="block w-full max-w-md rounded-xl border border-emerald-950/15 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-700 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-600/30"
           />
 
           {supplierFile && (
@@ -224,13 +224,13 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
         <button
           onClick={handleUpload}
           disabled={!projectFile || !supplierFile}
-          className="inline-flex items-center justify-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Créer le projet
         </button>
           <a
             href="/home"
-            className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-semibold text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+            className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
           >
             Annuler
           </a>
@@ -241,7 +241,7 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
 
       {status && (
         <div className="rounded-xl border border-emerald-700/15 bg-emerald-50 p-3 text-sm text-emerald-950/80">
-          <div className="font-semibold">Statut</div>
+          <div className="font-normal">Statut</div>
           <div className="mt-1">{status}</div>
         </div>
       )}

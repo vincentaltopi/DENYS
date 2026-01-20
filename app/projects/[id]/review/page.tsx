@@ -93,7 +93,7 @@ export default async function ProjectReviewPage({ params }: PageProps) {
             />
 
             <div className="leading-tight">
-              <div className="text-lg font-semibold text-emerald-700">
+              <div className="text-lg font-normal text-emerald-700">
                 Évaluateur Carbone des Projets
               </div>
             </div>
@@ -111,7 +111,7 @@ export default async function ProjectReviewPage({ params }: PageProps) {
       <section className="mx-auto flex min-h-[calc(100vh-73px)] max-w-6xl items-start justify-center px-6 pt-10">
         <div className="w-full">
           <div className="mb-6 flex flex-col gap-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-emerald-950">
+            <h1 className="text-3xl font-normal tracking-tight text-emerald-950">
               <span className="text-emerald-600">Projet</span>{" "}
               <span className="font-normal">{projectName}</span>
             </h1>
@@ -126,7 +126,7 @@ export default async function ProjectReviewPage({ params }: PageProps) {
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
               <a
                 href="/upload"
-                className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-semibold text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+                className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
               >
                 ← Retour à l’upload
               </a>

@@ -42,7 +42,7 @@ export default async function UploadPage() {
             />
 
             <div className="leading-tight">
-              <div className="text-lg font-semibold text-emerald-700">
+              <div className="text-lg font-normal text-emerald-700">
                 Évaluateur Carbone des Projets
               </div>
             </div>
@@ -61,7 +61,7 @@ export default async function UploadPage() {
         <div className="w-full max-w-3xl">
           {/* Title */}
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-normal tracking-tight">
               Nouveau projet
             </h1>
           </div>

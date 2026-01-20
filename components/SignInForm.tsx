@@ -47,7 +47,7 @@ export default function SignInForm() {
     }}
   >
     {/* Overlays (contraste + lisibilité) */}
-    <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-slate-950/25 to-slate-950/45" />
+    <div className="absolute inset-0 bg-gradient-to-b from-slate-900/30 via-slate-900/20 to-slate-900/35" />
 
     {/* Contenu */}
     <div className="relative mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12">
@@ -55,7 +55,7 @@ export default function SignInForm() {
         {/* Header (logo + titre) */}
         <div className="mx-auto mb-6 max-w-md text-center text-white">
           {/* Badge pour logo PNG avec fond */}
-          <div className="mx-auto mb-4 inline-flex items-center justify-center rounded-3xl bg-white/85 p-4 shadow-[0_15px_50px_rgba(0,0,0,0.25)] ring-1 ring-white/30">
+          <div className="mx-auto mb-4 inline-flex items-center justify-center ">
             <Image
               src="/images/LOGO_ALTOPI.png"
               alt="Altopi"
@@ -66,16 +66,16 @@ export default function SignInForm() {
             />
           </div>
 
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-medium tracking-tight">
             Évaluateur Carbone des Projets
           </h1>
         </div>
 
         {/* Carte */}
-        <div className="mx-auto max-w-md rounded-3xl border border-white/30 bg-white/60 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <div className="mx-auto max-w-md rounded-3xl border border-white/30 bg-white/40 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="grid gap-3">
             <div className="grid gap-1">
-              <label className="text-sm font-semibold text-emerald-950/80">
+              <label className="text-sm font-medium text-slate-700">
                 Email
               </label>
               <input
@@ -89,7 +89,7 @@ export default function SignInForm() {
             </div>
 
             <div className="grid gap-1">
-              <label className="text-sm font-semibold text-emerald-950/80">
+              <label className="text-sm font-medium text-slate-700">
                 Mot de passe
               </label>
               <input
@@ -105,7 +105,7 @@ export default function SignInForm() {
             <div className="pt-2 text-center">
               <a
                 href="/forgot-password"
-                className="text-sm font-semibold text-emerald-900/70 hover:text-emerald-950"
+                className="text-sm font-normal text-emerald-900/70 hover:text-emerald-950"
               >
                 Mot de passe oublié ?
               </a>
@@ -114,7 +114,7 @@ export default function SignInForm() {
             <button
               type="submit"
               disabled={!email || !password || loading}
-              className="mt-2 inline-flex items-center justify-center rounded-2xl bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-2 inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-4 py-2.5 text-sm font-normal text-white shadow-sm transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Connexion…" : "Se connecter"}
             </button>

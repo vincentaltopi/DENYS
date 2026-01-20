@@ -39,12 +39,12 @@ export default function AccountMenu({ name, email, initial }: AccountMenuProps) 
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-xs font-semibold text-emerald-900">
+        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-xs font-medium text-emerald-900">
           {initial}
         </div>
 
         <div className="hidden sm:block max-w-[160px] text-left">
-          <p className="truncate text-xs font-semibold text-emerald-950">
+          <p className="truncate text-xs font-medium text-emerald-950">
             {name}
           </p>
           <p className="truncate text-[11px] text-emerald-950/60">{email}</p>
@@ -71,7 +71,7 @@ export default function AccountMenu({ name, email, initial }: AccountMenuProps) 
           className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-emerald-950/10 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
         >
           <div className="px-4 py-3">
-            <p className="truncate text-sm font-semibold text-emerald-950">
+            <p className="truncate text-sm font-medium text-emerald-950">
               {name}
             </p>
             <p className="truncate text-xs text-emerald-950/60">{email}</p>

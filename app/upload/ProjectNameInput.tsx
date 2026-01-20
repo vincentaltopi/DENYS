@@ -13,7 +13,7 @@ export default function ProjectNameInput({
     <div className="mb-6">
       <label
         htmlFor="projectName"
-        className="mb-1 block text-sm font-semibold text-emerald-950/80"
+        className="mb-1 block text-sm font-medium text-emerald-950/80"
       >
         Nom du projet
       </label>

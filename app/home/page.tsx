@@ -23,7 +23,7 @@ export default async function HomePage() {
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <main className="min-h-screen bg-white text-emerald-950">
+    <main className="min-h-screen bg-slate-50 text-slate-900">
       {/* Top bar */}
       <header className="border-b border-emerald-700/30">
         <div className="flex items-center justify-between px-6 py-3">
@@ -39,7 +39,7 @@ export default async function HomePage() {
             />
 
             <div className="leading-tight">
-              <div className="text-lg font-semibold text-emerald-700">
+              <div className="text-lg font-normal text-emerald-800">
                 Évaluateur Carbone des Projets
               </div>
             </div>
@@ -60,14 +60,14 @@ export default async function HomePage() {
       {/* Center content */}
       <section className="mx-auto flex min-h-[calc(100vh-73px)] max-w-6xl items-start justify-center px-6 pt-20">
         <div className="w-full max-w-xl text-center">
-          <h1 className="text-4xl font-semibold tracking-tight text-emerald-950/85">
+          <h1 className="text-4xl font-normal tracking-tight text-slate-900">
             Bienvenue
           </h1>
 
           <div className="mx-auto mt-8 grid max-w-md gap-3">
             <a
               href="/upload"
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-600/30"
+              className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
             >
               Commencer un nouveau projet
             </a>
@@ -75,7 +75,7 @@ export default async function HomePage() {
             <button
               type="button"
               disabled
-              className="inline-flex items-center justify-center rounded-xl border border-emerald-950/15 bg-white px-5 py-3 text-sm font-semibold text-emerald-950/45 shadow-sm"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-400 shadow-sm"
             >
               Consulter mes projets (bientôt)
             </button>
