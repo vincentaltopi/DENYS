@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+
 
 type UploadButtonProps = {
   projectName: string;
@@ -57,16 +59,19 @@ export default function UploadButton({ projectName }: UploadButtonProps) {
       throw new Error(("error" in signed && signed.error) || "sign-upload failed");
     }
 
-    // 2) PUT file to signed upload url
-    const putRes = await fetch(signed.signedUrl, {
-      method: "PUT",
-      headers: { "Content-Type": f.type || "application/octet-stream" },
-      body: f,
-    });
+    // 2) Upload file using token (Supabase signed upload flow)
+    if (!("token" in signed) || !signed.token) {
+      throw new Error("sign-upload: missing token (needed for uploadToSignedUrl)");
+    }
 
-    if (!putRes.ok) {
-      const errText = await putRes.text().catch(() => "");
-      throw new Error(`Upload to Supabase failed (${putRes.status}) ${errText}`);
+    const { error: upErr } = await supabase.storage
+      .from(signed.bucket)
+      .uploadToSignedUrl(signed.path, signed.token, f, {
+        contentType: f.type || "application/octet-stream",
+      });
+
+    if (upErr) {
+      throw new Error(`Upload to Supabase failed: ${upErr.message}`);
     }
 
     // 3) get signed DOWNLOAD url (bucket privé)

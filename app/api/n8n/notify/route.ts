@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
     const text = await res.text().catch(() => "");
 
-    // 🔎 Logs de preuve côté Next
+    // Logs de preuve côté Next
     console.log("FORWARD TO N8N URL =", webhookUrl);
     console.log("N8N status =", res.status);
     console.log("N8N response =", text);
