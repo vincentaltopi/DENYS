@@ -155,6 +155,16 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
   const [selectionCmd, setSelectionCmd] = useState<SelectionCommand | null>(null);
 
+  type ProjectEvent = {
+    id: number;
+    type: "progress" | "error" | "info" | "done" | string;
+    message: string;
+    created_at: string;
+  };
+
+  const [events, setEvents] = useState<ProjectEvent[]>([]);
+
+
   useEffect(() => {
   if (data?.project?.status === "ready") {
     setShowResults(true);
@@ -497,13 +507,17 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
     const poll = async () => {
       try {
-        const [resPreval, resResults] = await Promise.all([
+        const [resPreval, resResults, resEvents] = await Promise.all([
           fetch(`/api/projects/${projectId}/prevalidation`, { cache: "no-store" }),
           fetch(`/api/projects/${projectId}/prevalidation?table=Results`, { cache: "no-store" }),
+          fetch(`/api/projects/${projectId}/events?limit=15`, { cache: "no-store" }),
         ]);
 
         const json: ApiResponse = await resPreval.json();
         const jsonResults: ResultsResponse = await resResults.json();
+        const jsonEvents = await resEvents.json().catch(() => null);
+        setEvents(Array.isArray(jsonEvents?.events) ? jsonEvents.events : []);
+
 
         if (cancelled) return;
 
@@ -568,11 +582,32 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
   return (
     <div className="space-y-4">
-      {data?.project?.status !== "ready" ? (
-        <div className="text-sm text-emerald-950/70">
-          Traitement en cours… 
+    {data?.project?.status !== "ready" ? (
+      <div className="rounded-xl border bg-white p-3">
+        <div className="mb-2 text-sm font-medium text-emerald-950/80">
+          Traitement en cours…
         </div>
-      ) : null}
+
+        <div className="max-h-40 overflow-y-auto rounded-lg border border-emerald-950/10 bg-emerald-50/30 p-2 text-xs">
+          {events.length === 0 ? (
+            <div className="text-emerald-950/60">En attente des premiers messages…</div>
+          ) : (
+            <div className="space-y-1">
+              {events.map((e) => (
+                <div key={e.id} className="flex gap-2">
+                  <div className="w-[70px] shrink-0 font-mono text-emerald-950/50">
+                    {new Date(e.created_at).toLocaleTimeString("fr-FR")}
+                  </div>
+                  <div className={String(e.type).toLowerCase() === "error" ? "text-rose-700" : "text-emerald-950/80"}>
+                    {e.message}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    ) : null}
 
 
       {showResults && (
