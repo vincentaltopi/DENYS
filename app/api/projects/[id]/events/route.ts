@@ -12,8 +12,12 @@ const supabaseAdmin = createClient(
   requiredEnv("SUPABASE_SERVICE_ROLE_KEY")
 );
 
-export async function GET(req: Request, ctx: { params: { projectId: string } }) {
-  const projectId = ctx.params.projectId;
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const projectId = params.id;
+
   const url = new URL(req.url);
   const limit = Math.min(Number(url.searchParams.get("limit") ?? "15") || 15, 50);
 
@@ -28,8 +32,5 @@ export async function GET(req: Request, ctx: { params: { projectId: string } }) 
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // UI: on veut souvent afficher du plus ancien -> plus récent
-  const events = (data ?? []).slice().reverse();
-
-  return NextResponse.json({ events });
+  return NextResponse.json({ events: (data ?? []).slice().reverse() });
 }
