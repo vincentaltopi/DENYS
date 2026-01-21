@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 function requiredEnv(name: string) {
@@ -13,13 +14,14 @@ const supabaseAdmin = createClient(
 );
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-  const projectId = params.id;
+  const { id } = await context.params;
+  const projectId = id;
 
-  const url = new URL(req.url);
-  const limit = Math.min(Number(url.searchParams.get("limit") ?? "15") || 15, 50);
+  const limitRaw = request.nextUrl.searchParams.get("limit");
+  const limit = Math.min(Number(limitRaw ?? "15") || 15, 50);
 
   const { data, error } = await supabaseAdmin
     .from("project_events")
