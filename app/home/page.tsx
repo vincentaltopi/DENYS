@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Image from "next/image";
 import AccountMenu from "@/components/AccountMenu";
 import LogoutButton from "@/components/LogoutButton";
+import { COLORS } from "@/app/chart.colors" ;
 
 export default async function HomePage() {
   const supabase = await createSupabaseServerClient();
@@ -39,7 +40,8 @@ export default async function HomePage() {
             />
 
             <div className="leading-tight">
-              <div className="text-lg font-normal text-emerald-800">
+              <div className="text-xl font-normal"
+                              style={{ color: COLORS.green_altopi }}>
                 Évaluateur Carbone des Projets
               </div>
             </div>

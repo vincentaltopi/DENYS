@@ -32,8 +32,11 @@ export default function ResetPasswordPage() {
         setErr(error.message || "Impossible de mettre à jour le mot de passe");
         return;
       }
+    // On déconnecte l'utilisateur
+    await supabase.auth.signOut();
 
-      setMsg("Mot de passe mis à jour. Tu peux maintenant te connecter.");
+    // Redirection automatique vers la page de connexion
+    window.location.href = "/";
     } finally {
       setLoading(false);
     }
@@ -44,16 +47,16 @@ export default function ResetPasswordPage() {
     <div className="w-full">
       {/* Header (logo + titre) */}
       <div className="mx-auto mb-6 max-w-md text-center text-white">
-        <div className="mx-auto mb-4 inline-flex items-center justify-center rounded-3xl bg-white/85 p-4 shadow-[0_15px_50px_rgba(0,0,0,0.25)] ring-1 ring-white/30">
-          <Image
-            src="/images/LOGO_ALTOPI.png"
-            alt="Altopi"
-            width={220}
-            height={110}
-            priority
-            className="h-auto w-44"
-          />
-        </div>
+          <div className="mx-auto mb-4 inline-flex items-center justify-center ">
+            <Image
+              src="/images/LOGO_ALTOPI.png"
+              alt="Altopi"
+              width={220}
+              height={110}
+              priority
+              className="h-auto w-44"
+            />
+          </div>
 
         <h1 className="text-2xl font-semibold tracking-tight">
           Nouveau mot de passe

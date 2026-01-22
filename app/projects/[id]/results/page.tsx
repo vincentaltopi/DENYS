@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Image from "next/image";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { COLORS } from "@/app/chart.colors";
 
 import ResultsPanel from "./ResultsPanel";
 import AccountMenu from "@/components/AccountMenu";
@@ -88,7 +89,8 @@ export default async function ProjectResultsPage({ params }: PageProps) {
               className="h-auto w-44"
             />
             <div className="leading-tight">
-              <div className="text-lg font-normal text-emerald-700">
+              <div className="text-xl font-normal"
+                              style={{ color: COLORS.green_altopi }}>
                 Évaluateur Carbone des Projets
               </div>
             </div>
@@ -113,7 +115,8 @@ export default async function ProjectResultsPage({ params }: PageProps) {
             </h1>
 
             <div className="mt-4 flex items-center justify-between">
-              <h2 className="text-lg font-normal text-emerald-950/85">
+              <h2 className="text-lg font-normal"
+                              style={{ color: COLORS.green_altopi }}>
                 Résultats
               </h2>
 

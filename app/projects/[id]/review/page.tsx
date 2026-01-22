@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Image from "next/image";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { COLORS } from "@/app/chart.colors";
 
 import AccountMenu from "@/components/AccountMenu";
 import LogoutButton from "@/components/LogoutButton";
@@ -93,7 +94,8 @@ export default async function ProjectReviewPage({ params }: PageProps) {
             />
 
             <div className="leading-tight">
-              <div className="text-lg font-normal text-emerald-700">
+              <div className="text-xl font-normal"
+                style={{ color: COLORS.green_altopi }}>
                 Évaluateur Carbone des Projets
               </div>
             </div>
@@ -115,7 +117,8 @@ export default async function ProjectReviewPage({ params }: PageProps) {
               <span className="text-emerald-600">Projet</span>{" "}
               <span className="font-normal">{projectName}</span>
             </h1>
-            <p className="text-lg text-emerald-950/60">
+            <p className="text-xl font-normal"
+                style={{ color: COLORS.green_altopi }}>
               Prévalidation des lignes du projet
             </p>
           </div>
