@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import AccountMenu from "@/components/AccountMenu";
 import LogoutButton from "@/components/LogoutButton";
 import { COLORS } from "@/app/chart.colors";
+import ProjectActions from "@/components/ProjectActions";
 
 function getStatusUI(status: string) {
   switch (status) {
@@ -51,8 +52,8 @@ export default async function MyProjectsPage() {
 
   const { data: projects, error } = await supabase
     .from("projects")
-    .select("id, name, status, created_at")
-    .eq("user_id", user.id)
+    .select("id, name, status, created_at, created_by_email")
+    .is("archived_at", null)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -71,14 +72,16 @@ export default async function MyProjectsPage() {
       <header className="border-b border-emerald-700/30">
         <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-10">
+          <Link href="/home" className="inline-flex items-center">
             <Image
               src="/images/LOGO_ALTOPI.png"
               alt="Altopi"
               width={120}
               height={40}
               priority
-              className="h-auto w-44"
+              className="h-auto w-44 cursor-pointer"
             />
+          </Link>
 
             <div
               className="text-xl font-normal"
@@ -122,50 +125,65 @@ export default async function MyProjectsPage() {
                 status === "ready"
                   ? `/projects/${project.id}/review`
                   : status === "locked"
-                  ? `/projects/${project.id}/results`
-                  : null;
+                    ? `/projects/${project.id}/results`
+                    : null;
 
-              const CardContent = (
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-base font-medium">
-                      {project.name || "Projet sans nom"}
-                    </div>
+              const isDisabled = !href;
 
-                    <div className="mt-1 text-xs text-slate-500">
-                      Créé le{" "}
-                      {new Date(project.created_at).toLocaleDateString("fr-FR")}
-                    </div>
-                  </div>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${statusUI.className}`}
-                  >
-                    {statusUI.label}
-                  </span>
-                </div>
-              );
-
-              if (!href) {
                 return (
                   <div
                     key={project.id}
-                    className="cursor-not-allowed rounded-xl border bg-white p-4 opacity-60"
+                    className={[
+                      "relative rounded-xl border bg-white p-4 shadow-sm",
+                      href ? "transition hover:bg-slate-50" : "opacity-60 cursor-not-allowed",
+                    ].join(" ")}
                   >
-                    {CardContent}
+                    {/* Overlay cliquable sur toute la carte */}
+                    {href ? (
+                      <Link
+                        href={href}
+                        aria-label={`Ouvrir ${project.name || "Projet sans nom"}`}
+                        className="absolute inset-0 z-0 rounded-xl"
+                      />
+                    ) : null}
+
+                    {/* Contenu : on laisse passer les clics vers l’overlay */}
+                    <div className="relative z-10 pointer-events-none">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="text-base font-medium">
+                            {project.name || "Projet sans nom"}
+                          </div>
+
+                          <div className="mt-1 text-xs text-slate-500">
+                            Créé le{" "}
+                            {new Date(project.created_at).toLocaleDateString("fr-FR")}
+                            {project.created_by_email && (
+                          <div className="mt-0.5 text-xs text-slate-400">
+                            Créé par {project.created_by_email}
+                          </div>
+                        )}
+                          </div>
+                        </div>
+
+                        <span
+                          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${statusUI.className}`}
+                        >
+                          {statusUI.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Actions : au-dessus de l’overlay + cliquables */}
+                    <div className="relative z-20 mt-3 flex items-center justify-end pointer-events-auto">
+                      <ProjectActions
+                        projectId={String(project.id)}
+                        currentName={project.name || "Projet sans nom"}
+                        disabled={status === "processing"}
+                      />
+                    </div>
                   </div>
                 );
-              }
-
-              return (
-                <Link
-                  key={project.id}
-                  href={href}
-                  className="block rounded-xl border bg-white p-4 shadow-sm transition hover:bg-slate-50"
-                >
-                  {CardContent}
-                </Link>
-              );
             })
           )}
         </div>

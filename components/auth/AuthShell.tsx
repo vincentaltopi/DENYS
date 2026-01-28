@@ -7,7 +7,7 @@ export default function AuthShell({ children }: AuthShellProps) {
     <main
       className="relative min-h-screen"
       style={{
-        backgroundImage: "url(/images/mountains.jpg)",
+        backgroundImage: "url(/images/fond_ecran_denys.jpg)",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

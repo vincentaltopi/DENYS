@@ -17,6 +17,7 @@ export default async function AccountPage() {
 
   return (
     <main className="min-h-screen bg-white px-6 py-10 text-emerald-950">
+      
       <div className="mx-auto max-w-2xl">
         <header className="mb-6">
           <h1 className="text-2xl font-semibold tracking-tight">Mon compte</h1>

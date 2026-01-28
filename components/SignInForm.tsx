@@ -41,7 +41,7 @@ export default function SignInForm() {
   <main
     className="relative min-h-screen text-emerald-950"
     style={{
-      backgroundImage: "url(/images/mountains.jpg)",
+      backgroundImage: "url(/images/fond_ecran_denys.jpg)",
       backgroundSize: "cover",
       backgroundPosition: "center",
     }}

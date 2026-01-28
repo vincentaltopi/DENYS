@@ -44,16 +44,16 @@ return (
     <div className="w-full">
       {/* Header (logo + titre) */}
       <div className="mx-auto mb-6 max-w-md text-center text-white">
-        <div className="mx-auto mb-4 inline-flex items-center justify-center rounded-3xl bg-white/85 p-4 shadow-[0_15px_50px_rgba(0,0,0,0.25)] ring-1 ring-white/30">
-          <Image
-            src="/images/LOGO_ALTOPI.png"
-            alt="Altopi"
-            width={220}
-            height={110}
-            priority
-            className="h-auto w-44"
-          />
-        </div>
+          <div className="mx-auto mb-4 inline-flex items-center justify-center ">
+            <Image
+              src="/images/LOGO_ALTOPI.png"
+              alt="Altopi"
+              width={220}
+              height={110}
+              priority
+              className="h-auto w-44"
+            />
+          </div>
 
         <h1 className="text-2xl font-semibold tracking-tight">
           Mot de passe oublié
@@ -62,9 +62,7 @@ return (
 
       {/* Carte */}
       <div className="mx-auto max-w-md rounded-3xl border border-white/30 bg-white/60 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-        <p className="text-sm text-emerald-950/70">
-          Indique ton email et on t’envoie un lien de réinitialisation.
-        </p>
+
 
         <div className="mt-4 grid gap-3">
           <input

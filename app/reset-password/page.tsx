@@ -111,9 +111,13 @@ export default function ResetPasswordPage() {
         </div>
       </div>
 
-      <div className="mx-auto mt-6 max-w-md text-center text-xs text-white/70">
+      <div
+        className="mx-auto mt-6 max-w-md text-center text-xs text-white/70"
+        suppressHydrationWarning
+      >
         © {new Date().getFullYear()} Altopi
       </div>
+
     </div>
   </AuthShell>
 );

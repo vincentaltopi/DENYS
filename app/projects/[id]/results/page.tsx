@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Image from "next/image";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { COLORS } from "@/app/chart.colors";
-
+import Link from "next/link";
 import ResultsPanel from "./ResultsPanel";
 import AccountMenu from "@/components/AccountMenu";
 import LogoutButton from "@/components/LogoutButton";
@@ -79,14 +79,16 @@ export default async function ProjectResultsPage({ params }: PageProps) {
       <header className="border-b border-emerald-700/30">
         <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-10">
+          <Link href="/home" className="inline-flex items-center">
             <Image
               src="/images/LOGO_ALTOPI.png"
               alt="Altopi"
               width={120}
               height={40}
               priority
-              className="h-auto w-44"
+              className="h-auto w-44 cursor-pointer"
             />
+          </Link>
 
             <div
               className="text-xl font-normal"
