@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 
 /* ===================== TYPES ===================== */
 
@@ -19,8 +21,7 @@ type Row = Record<string, any>;
 
 type ApiResponse = {
   project?: { status?: "processing" | "ready" | "error" | string };
-  top30_euros_ia?: Row[];
-  top30_emissions_ia?: Row[];
+
   Results?: Row[]; // table des statuts de vérif/retraitement
 };
 
@@ -143,6 +144,7 @@ function stripDiacritics(s: string) {
 /* ===================== MAIN ===================== */
 
 export default function ReviewPanel({ projectId }: ReviewPanelProps) {
+  const router = useRouter();
   const [showResults, setShowResults] = useState(false);
 
   const [data, setData] = useState<ApiResponse | null>(null);
@@ -164,7 +166,11 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
   const [events, setEvents] = useState<ProjectEvent[]>([]);
 
+  const [finalizeError, setFinalizeError] = useState<string | null>(null);
+  const [finalizeLoading, setFinalizeLoading] = useState(false);
 
+
+  
   useEffect(() => {
   if (data?.project?.status === "ready") {
     setShowResults(true);
@@ -465,7 +471,7 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
   /* ---------- bulk status (uniquement lignes a_verif) ---------- */
   const setVerifStatus = async (ids: string[], status: "Validée" | "Non validée") => {
-    await fetch(`/api/projects/${projectId}/lignes-verif/status`, {
+    await fetch(`/api/projects/${projectId}/results_reprocess/status`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids, status }),
@@ -490,6 +496,33 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
     await setVerifStatus([retryDraft.rowId], isValidated ? "Non validée" : "Validée");
     closeRetryModal();
   }, [retryDraft, closeRetryModal]);
+
+  const finalizeAndGoToResults = useCallback(async () => {
+    if (!allVerified) return;
+
+    try {
+      setFinalizeError(null);
+      setFinalizeLoading(true);
+
+      const res = await fetch(`/api/projects/${projectId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "locked" }),
+      });
+
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error(t || `API error ${res.status}`);
+      }
+
+      router.push(`/projects/${projectId}/results`);
+    } catch (e: any) {
+      setFinalizeError(e?.message || "Erreur lors de la finalisation");
+    } finally {
+      setFinalizeLoading(false);
+    }
+  }, [allVerified, projectId, router]);
+
 
 
   /* ---------- poll ---------- */
@@ -552,7 +585,7 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
         });
 
         if (!showResults) {
-          if (json.project?.status !== "ready") {
+          if (json.project?.status !== "ready" && json.project?.status !== "locked") {
             pollTimerRef.current = setTimeout(poll, 2000);
           }
           return;
@@ -707,22 +740,29 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
               </div>
             }
           />
+          {finalizeError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+              {finalizeError}
+            </div>
+          )}
 
           {/* CTA final */}
           <div className="sticky bottom-0 mt-4 flex flex-wrap items-center justify-end gap-2 bg-white/70 pt-3 backdrop-blur">
-            <Link
-              href={`/projects/${projectId}/results`}
-              className={[
-                "rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition",
-                allVerified
-                  ? "bg-emerald-800 text-white hover:bg-emerald-900"
-                  : "bg-emerald-800/40 text-white/70 pointer-events-none cursor-not-allowed",
-              ].join(" ")}
-              aria-disabled={!allVerified}
-              title={allVerified ? "Voir les résultats finaux" : "Valide toutes les lignes à vérifier pour continuer"}
-            >
-              Voir les résultats finaux
-            </Link>
+          <button
+            type="button"
+            onClick={finalizeAndGoToResults}
+            disabled={!allVerified || finalizeLoading}
+            className={[
+              "rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition",
+              allVerified && !finalizeLoading
+                ? "bg-emerald-800 text-white hover:bg-emerald-900"
+                : "bg-emerald-800/40 text-white/70 cursor-not-allowed",
+            ].join(" ")}
+            title={allVerified ? "Voir les résultats finaux" : "Valide toutes les lignes à vérifier pour continuer"}
+          >
+            {finalizeLoading ? "Chargement…" : "Voir les résultats finaux"}
+          </button>
+
           </div>
 
           {/* MODALE RETRAITEMENT */}
@@ -762,7 +802,9 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
                         {
                           label: "FE",
                           value:
-                            retryDraft.row?.["score_émission"],
+                            retryDraft.row?.["score_émission"]?.toLocaleString("fr-FR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2}),
                           right:
                             retryDraft.row?.["unité_post"]
                         },
@@ -877,6 +919,14 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
           )}
         </>
       )}
+      <div className="mt-8 flex flex-wrap gap-3">
+        <button
+          onClick={() => router.push("/home")}
+          className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+        >
+          ← Retour à l’accueil
+        </button>
+      </div>
     </div>
   );
 }
@@ -1284,12 +1334,59 @@ function DataTable({
                         );
                       }
 
-                      const v = row?.[col];
+                    // Prix total → 2 décimales
+                    if (col === "prix_total(euro)") {
+                      const n = typeof row?.[col] === "number"
+                        ? row[col]
+                        : Number(
+                            String(row?.[col] ?? "")
+                              .replace(/\s/g, "")
+                              .replace(/€/g, "")
+                              .replace(/,/g, ".")
+                          );
+
                       return (
                         <td key={col} className="px-2 py-2 whitespace-nowrap">
-                          {formatCell(v)}
+                          {Number.isFinite(n)
+                            ? n.toLocaleString("fr-FR", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                            : "—"}
                         </td>
                       );
+                    }
+
+                    // Émissions → 2 décimales
+                    if (col === "émission_totale") {
+                      const n = typeof row?.[col] === "number"
+                        ? row[col]
+                        : Number(
+                            String(row?.[col] ?? "")
+                              .replace(/\s/g, "")
+                              .replace(/,/g, ".")
+                          );
+
+                      return (
+                        <td key={col} className="px-2 py-2 whitespace-nowrap">
+                          {Number.isFinite(n)
+                            ? n.toLocaleString("fr-FR", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                            : "—"}
+                        </td>
+                      );
+                    }
+
+                    // fallback par défaut
+                    const v = row?.[col];
+                    return (
+                      <td key={col} className="px-2 py-2 whitespace-nowrap">
+                        {formatCell(v)}
+                      </td>
+                      );
+
                     })}
                   </tr>
                 );

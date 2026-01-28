@@ -25,10 +25,9 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Top bar */}
+{/* Top bar */}
       <header className="border-b border-emerald-700/30">
         <div className="flex items-center justify-between px-6 py-3">
-          {/* Left: logo + app title */}
           <div className="flex items-center gap-10">
             <Image
               src="/images/LOGO_ALTOPI.png"
@@ -39,22 +38,17 @@ export default async function HomePage() {
               className="h-auto w-44"
             />
 
-            <div className="leading-tight">
-              <div className="text-xl font-normal"
-                              style={{ color: COLORS.green_altopi }}>
-                Évaluateur Carbone des Projets
-              </div>
+            <div
+              className="text-xl font-normal"
+              style={{ color: COLORS.green_altopi }}
+            >
+              Évaluateur Carbone des Projets
             </div>
           </div>
 
-          {/* Right: account menu */}
           <div className="flex items-center gap-3">
             <AccountMenu name={name} email={email} initial={initial} />
-
-            {/* Bouton logout à côté (style icône) */}
-            <div className="rounded-xl border border-emerald-950/10 bg-white p-2 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-              <LogoutButton iconOnly />
-            </div>
+            <LogoutButton iconOnly />
           </div>
         </div>
       </header>
@@ -74,13 +68,13 @@ export default async function HomePage() {
               Commencer un nouveau projet
             </a>
 
-            <button
-              type="button"
-              disabled
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-400 shadow-sm"
+            <a
+              href="/my-projects"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
             >
-              Consulter mes projets (bientôt)
-            </button>
+              Consulter mes projets
+            </a>
+
           </div>
         </div>
       </section>

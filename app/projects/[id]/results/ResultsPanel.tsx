@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { useRouter } from "next/navigation";
 
 import { PIE_MONETARY, PIE_FOUND, COLORS } from "@/app/chart.colors";
 
@@ -72,10 +73,6 @@ function isDefaultMonetaryUpdate(r: any) {
     String(v ?? "").toLowerCase() === "default_monetary_update" ||
     String(v ?? "").toLowerCase() === "monetary_update_default"
   );
-}
-
-function toPie(items: Array<[string, number]>): PieDatum[] {
-  return items.map(([name, value]) => ({ name, value }));
 }
 
 function formatPct(p: number) {
@@ -150,6 +147,8 @@ function SubcatEmissionsTooltip({
   unit?: string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
+
+  console.log(payload)
 
   const item = payload[0];
   const name = String(item?.name ?? "");
@@ -273,7 +272,7 @@ function EcoDonut({
   centerLabel?: string;
   tooltipContent?: any; // Recharts ContentType
   rightLegend?: boolean;
-  unit?: string; // ex: "kgCO2e"
+  unit?: string; 
 }) {
   const total = data.reduce((s, d) => s + (Number(d.value) || 0), 0);
 
@@ -294,7 +293,7 @@ function EcoDonut({
     }))
     .filter((x) => x.v > 0 || x.lines > 0);
 
-  const showLegend = total > 0 && legendItems.length >= 2;
+  const showLegend = total > 0 && legendItems.length >= 1;
 
   const SmallLegend = ({ payload }: any) => {
     if (!payload?.length) return null;
@@ -320,7 +319,7 @@ function EcoDonut({
             const pct = total > 0 ? (v / total) * 100 : 0;
             const lines = typeof d.lines === "number" ? d.lines : undefined;
 
-            // ✅ si part nulle et aucune ligne -> on ne l'affiche pas en légende
+            // si part nulle et aucune ligne -> on ne l'affiche pas en légende
             if (v <= 0 && !(lines && lines > 0)) return null;
 
             const vDisplay = isKgUnit
@@ -395,7 +394,7 @@ function EcoDonut({
                   ))}
                 </Pie>
 
-                {/* ✅ Tooltip content doit être une fonction/composant */}
+                {/* Tooltip content doit être une fonction/composant */}
                 <Tooltip content={tooltipContent ?? DonutTooltip} />
               </PieChart>
             </ResponsiveContainer>
@@ -502,6 +501,7 @@ function getPoidsCarbone(row: any): number | null {
 }
 
 export default function ResultsPanel({ projectId }: ResultsPanelProps) {
+  const router = useRouter();
   const [rows, setRows] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -995,6 +995,14 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
             </div>
           </div>
         )}
+        <div className="mt-8 flex flex-wrap gap-3">
+        <button
+          onClick={() => router.push("/home")}
+          className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+        >
+          ← Retour à l’accueil
+        </button>
+        </div>
 
     </div>
   );

@@ -6,6 +6,7 @@ import Image from "next/image";
 import AccountMenu from "@/components/AccountMenu";
 import LogoutButton from "@/components/LogoutButton";
 import UploadForm from "./UploadForm";
+import {COLORS} from "@/app/chart.colors"
 
 export default async function UploadPage() {
   const supabase = await createSupabaseServerClient();
@@ -27,10 +28,9 @@ export default async function UploadPage() {
 
   return (
     <main className="min-h-screen bg-white text-emerald-950">
-      {/* Top bar (comme Home) */}
+{/* Top bar */}
       <header className="border-b border-emerald-700/30">
         <div className="flex items-center justify-between px-6 py-3">
-          {/* Left */}
           <div className="flex items-center gap-10">
             <Image
               src="/images/LOGO_ALTOPI.png"
@@ -41,14 +41,14 @@ export default async function UploadPage() {
               className="h-auto w-44"
             />
 
-            <div className="leading-tight">
-              <div className="text-lg font-normal text-emerald-700">
-                Évaluateur Carbone des Projets
-              </div>
+            <div
+              className="text-xl font-normal"
+              style={{ color: COLORS.green_altopi }}
+            >
+              Évaluateur Carbone des Projets
             </div>
           </div>
 
-          {/* Right */}
           <div className="flex items-center gap-3">
             <AccountMenu name={name} email={email} initial={initial} />
             <LogoutButton iconOnly />

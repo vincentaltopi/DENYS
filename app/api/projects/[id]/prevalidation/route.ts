@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-const ALLOWED_TABLES = new Set(["top30_euros_ia", "top30_emissions_ia", "Results"]);
+const ALLOWED_TABLES = new Set(["Results"]);
 
 async function assertProjectOwner(projectId: string, userId: string) {
   const { data, error } = await supabaseAdmin
@@ -56,19 +56,15 @@ export async function GET(req: Request, ctx: Ctx) {
     return NextResponse.json({ project: ownership.project, table, rows: data ?? [] });
   }
 
-  const [euros, fe, results] = await Promise.all([
-    supabaseAdmin.from("top30_euros_ia").select("*").eq("project_id", projectId).order("id", { ascending: true }),
-    supabaseAdmin.from("top30_emissions_ia").select("*").eq("project_id", projectId).order("id", { ascending: true }),
+  const [results] = await Promise.all([
     supabaseAdmin.from("Results").select("*").eq("project_id", projectId).order("id", { ascending: true }),
   ]);
 
-  const firstError = euros.error || fe.error || results.error;
+  const firstError = results.error;
   if (firstError) return NextResponse.json({ error: firstError.message }, { status: 500 });
 
   return NextResponse.json({
     project: ownership.project,
-    top30_euros_ia: euros.data ?? [],
-    top30_emissions_ia: fe.data ?? [],
     Results: results.data ?? [],
   });
 }

@@ -51,7 +51,7 @@ export async function POST(req: Request, ctx: Ctx) {
   // Update
   const { error } = await supabaseAdmin
     .from("Results")
-    .update({ reprocess_status: "Validée" })
+    .update({ statut: "Validée" })
     .eq("project_id", projectId)
     .in("id", ids);
 

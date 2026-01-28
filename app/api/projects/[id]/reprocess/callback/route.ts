@@ -8,7 +8,7 @@ type Body = {
 };
 
 function getSupabaseAdmin() {
-  // ✅ serveur: utiliser NEXT_PUBLIC_SUPABASE_URL (pas NEXT_PUBLIC_*)
+  // serveur: utiliser NEXT_PUBLIC_SUPABASE_URL (pas NEXT_PUBLIC_*)
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   return createClient(url, serviceKey, { auth: { persistSession: false } });
@@ -30,7 +30,7 @@ const ALLOWED_STATUSES = new Set(["processing", "done", "failed"]);
 export async function POST(req: Request, ctx: Ctx) {
   const { id: projectId } = await Promise.resolve(ctx.params);
 
-  // ✅ Sécurité: secret machine-to-machine (n8n -> ton app)
+  // Sécurité: secret machine-to-machine (n8n -> ton app)
   const expected = process.env.REPROCESS_CALLBACK_SECRET;
   const provided = req.headers.get("x-reprocess-secret") ?? "";
 

@@ -26,6 +26,8 @@ export default async function ProjectReviewPage({ params }: PageProps) {
       redirect(`/?returnTo=/projects/${id}/review`);
     }
 
+  
+
     // Sécurité : on récupère le projet de CE user uniquement
   // 1) Requête actuelle (id + user) — inchangée
   const { data: project, error: projectError } = await supabase
@@ -38,6 +40,7 @@ export default async function ProjectReviewPage({ params }: PageProps) {
   if (projectError) {
     console.error("Error fetching project name:", projectError.message);
   }
+
 
   // Fallback minimal: si le user client ne voit pas le projet, on lit en admin
   // MAIS on vérifie l'ownership avant d'utiliser le nom (sinon redirect menu).
@@ -79,10 +82,9 @@ export default async function ProjectReviewPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-white text-emerald-950">
-      {/* Top bar (comme Home) */}
+{/* Top bar */}
       <header className="border-b border-emerald-700/30">
         <div className="flex items-center justify-between px-6 py-3">
-          {/* Left: logo + app title */}
           <div className="flex items-center gap-10">
             <Image
               src="/images/LOGO_ALTOPI.png"
@@ -93,15 +95,14 @@ export default async function ProjectReviewPage({ params }: PageProps) {
               className="h-auto w-44"
             />
 
-            <div className="leading-tight">
-              <div className="text-xl font-normal"
-                style={{ color: COLORS.green_altopi }}>
-                Évaluateur Carbone des Projets
-              </div>
+            <div
+              className="text-xl font-normal"
+              style={{ color: COLORS.green_altopi }}
+            >
+              Évaluateur Carbone des Projets
             </div>
           </div>
 
-          {/* Right: account menu + logout */}
           <div className="flex items-center gap-3">
             <AccountMenu name={name} email={email} initial={initial} />
             <LogoutButton iconOnly />
@@ -114,7 +115,8 @@ export default async function ProjectReviewPage({ params }: PageProps) {
         <div className="w-full">
           <div className="mb-6 flex flex-col gap-2">
             <h1 className="text-3xl font-normal tracking-tight text-emerald-950">
-              <span className="text-emerald-600">Projet</span>{" "}
+              <span className="text-emerald-600"
+               style={{ color: COLORS.green_altopi }}>Projet</span>{" "}
               <span className="font-normal">{projectName}</span>
             </h1>
             <p className="text-xl font-normal"

@@ -75,10 +75,9 @@ export default async function ProjectResultsPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-white text-emerald-950">
-      {/* Top bar (comme Home) */}
+{/* Top bar */}
       <header className="border-b border-emerald-700/30">
         <div className="flex items-center justify-between px-6 py-3">
-          {/* Left */}
           <div className="flex items-center gap-10">
             <Image
               src="/images/LOGO_ALTOPI.png"
@@ -88,15 +87,15 @@ export default async function ProjectResultsPage({ params }: PageProps) {
               priority
               className="h-auto w-44"
             />
-            <div className="leading-tight">
-              <div className="text-xl font-normal"
-                              style={{ color: COLORS.green_altopi }}>
-                Évaluateur Carbone des Projets
-              </div>
+
+            <div
+              className="text-xl font-normal"
+              style={{ color: COLORS.green_altopi }}
+            >
+              Évaluateur Carbone des Projets
             </div>
           </div>
 
-          {/* Right */}
           <div className="flex items-center gap-3">
             <AccountMenu name={name} email={email} initial={initial} />
             <LogoutButton iconOnly />
@@ -110,7 +109,8 @@ export default async function ProjectResultsPage({ params }: PageProps) {
           {/* Title zone like screenshot: "Projet <name>" + "Résultats" */}
           <div className="mb-6">
             <h1 className="text-3xl font-normal tracking-tight text-emerald-950">
-              <span className="text-emerald-600">Projet</span>{" "}
+              <span className="text-emerald-600"
+              style={{ color: COLORS.green_altopi }}>Projet</span>{" "}
               <span className="font-normal">{projectName}</span>
             </h1>
 
