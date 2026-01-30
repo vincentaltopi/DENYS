@@ -1,23 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 
-async function assertProjectOwner(projectId: string, userId: string) {
-  const { data, error } = await supabaseAdmin
-    .from("projects")
-    .select("id,user_id,status,name,archived_at")
-    .eq("id", projectId)
-    .maybeSingle();
-
-  if (error || !data) {
-    return { ok: false as const, status: 404, error: "Project not found" };
-  }
-  if (String(data.user_id) !== String(userId)) {
-    return { ok: false as const, status: 403, error: "Forbidden" };
-  }
-  return { ok: true as const, project: data };
-}
 
 type Ctx = { params: { id: string } | Promise<{ id: string }> };
 
@@ -34,10 +18,16 @@ export async function PATCH(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const ownership = await assertProjectOwner(projectId, user.id);
-  if (!ownership.ok) {
-    return NextResponse.json({ error: ownership.error }, { status: ownership.status });
+  const { data: project, error: projectError } = await supabase
+  .from("projects")
+  .select("id,name,status")
+  .eq("id", projectId)
+  .maybeSingle();
+
+  if (projectError || !project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+
 
   const body = await req.json().catch(() => null);
 
@@ -64,7 +54,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
-  const { error } = await supabaseAdmin.from("projects").update(update).eq("id", projectId);
+  const { error } = await supabase.from("projects").update(update).eq("id", projectId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

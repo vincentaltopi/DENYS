@@ -1,7 +1,6 @@
 // app/api/projects/[id]/results/route.ts
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 type Ctx = { params: { id: string } | Promise<{ id: string }> };
 
@@ -20,7 +19,7 @@ export async function GET(_req: Request, ctx: Ctx) {
   }
 
   // 2) Ownership check (important: service role bypass RLS)
-  const { data: projectRow, error: projErr } = await supabaseAdmin
+  const { data: projectRow, error: projErr } = await supabase
     .from("projects")
     .select("id,user_id")
     .eq("id", projectId)
@@ -32,12 +31,10 @@ export async function GET(_req: Request, ctx: Ctx) {
   if (!projectRow) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
-  if (String(projectRow.user_id) !== String(user.id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+
 
   // 3) Read results for this project only
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("Results")
     .select("*")
     .eq("project_id", projectId);

@@ -4,18 +4,6 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 const ALLOWED_TABLES = new Set(["Results"]);
 
-async function assertProjectOwner(projectId: string, userId: string) {
-  const { data, error } = await supabaseAdmin
-    .from("projects")
-    .select("id,user_id,status,name")
-    .eq("id", projectId)
-    .maybeSingle();
-
-  if (error || !data) return { ok: false as const, status: 404, error: "Project not found" };
-  if (String(data.user_id) !== String(userId)) return { ok: false as const, status: 403, error: "Forbidden" };
-  return { ok: true as const, project: data };
-}
-
 type Ctx = { params: Promise<{ id: string }> | { id: string } };
 
 export async function GET(req: Request, ctx: Ctx) {
@@ -29,10 +17,15 @@ export async function GET(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userId = user.id;
+  // ✅ plus d’ownership check : on vérifie juste que le projet existe
+  const { data: project, error: projectErr } = await supabaseAdmin
+    .from("projects")
+    .select("id,status,name,user_id") // mets les champs que tu veux renvoyer
+    .eq("id", projectId)
+    .maybeSingle();
 
-  const ownership = await assertProjectOwner(projectId, userId);
-  if (!ownership.ok) return NextResponse.json({ error: ownership.error }, { status: ownership.status });
+  if (projectErr) return NextResponse.json({ error: projectErr.message }, { status: 500 });
+  if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
 
   const url = new URL(req.url);
   const table = url.searchParams.get("table");
@@ -42,29 +35,41 @@ export async function GET(req: Request, ctx: Ctx) {
       return NextResponse.json({ error: "Invalid table" }, { status: 400 });
     }
 
-    let q = supabaseAdmin.from(table).select("*").eq("project_id", projectId);
+      const page = Number(url.searchParams.get("page") ?? "0");
+      const pageSize = Math.min(Number(url.searchParams.get("pageSize") ?? "1000"), 5000);
 
-    if (table === "Results") {
-      q = q.order("a_verif", { ascending: false }).order("id", { ascending: true });
-    } else {
-      q = q.order("id", { ascending: true });
-    }
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
 
-    const { data, error } = await q;
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      let q = supabaseAdmin
+        .from(table)
+        .select("*")
+        .eq("project_id", projectId)
+        .range(from, to);
 
-    return NextResponse.json({ project: ownership.project, table, rows: data ?? [] });
+      if (table === "Results") {
+        q = q.order("a_verif", { ascending: true }).order("id", { ascending: true });
+      } else {
+        q = q.order("id", { ascending: true });
+      }
+
+      const { data, error } = await q;
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      return NextResponse.json({ project, table, rows: data ?? [], page, pageSize });
+
   }
 
-  const [results] = await Promise.all([
-    supabaseAdmin.from("Results").select("*").eq("project_id", projectId).order("id", { ascending: true }),
-  ]);
+  const { data: results, error: resultsErr } = await supabaseAdmin
+    .from("Results")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("a_verif", { ascending: true }).limit(5000);
 
-  const firstError = results.error;
-  if (firstError) return NextResponse.json({ error: firstError.message }, { status: 500 });
+  if (resultsErr) return NextResponse.json({ error: resultsErr.message }, { status: 500 });
 
   return NextResponse.json({
-    project: ownership.project,
-    Results: results.data ?? [],
+    project,
+    Results: results ?? [],
   });
 }

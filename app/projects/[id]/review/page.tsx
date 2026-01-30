@@ -34,7 +34,6 @@ export default async function ProjectReviewPage({ params }: PageProps) {
     .from("projects")
     .select("id,name,user_id")
     .eq("id", id)
-    .eq("user_id", user.id)
     .maybeSingle();
 
   if (projectError) {
@@ -46,24 +45,6 @@ export default async function ProjectReviewPage({ params }: PageProps) {
   // MAIS on vérifie l'ownership avant d'utiliser le nom (sinon redirect menu).
   let projectName = project?.name?.trim() || "";
 
-  if (!projectName) {
-    const { data: adminRow, error: adminErr } = await supabaseAdmin
-      .from("projects")
-      .select("id,name,user_id")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (adminErr || !adminRow) {
-      redirect("/home");
-    }
-
-    // sécurité : on ne révèle rien si pas owner
-    if (String(adminRow.user_id) !== String(user.id)) {
-      redirect("/home");
-    }
-
-    projectName = adminRow.name?.trim() || "";
-  }
 
   if (!projectName) projectName = "Projet";
 

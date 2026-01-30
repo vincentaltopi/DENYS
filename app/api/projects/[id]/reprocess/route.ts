@@ -15,10 +15,7 @@ export async function POST(req: Request, ctx: Ctx) {
 
   // 1) Auth (Supabase)
   const supabaseAuth = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userErr,
-  } = await supabaseAuth.auth.getUser();
+  const { data: { user }, error: userErr } = await supabaseAuth.auth.getUser();
 
   if (userErr || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -50,11 +47,10 @@ export async function POST(req: Request, ctx: Ctx) {
 
   const supabaseAdmin = getSupabaseAdmin();
 
-  // 3bis) SECURITE : vérifier que le projet appartient à l'utilisateur connecté
-  // (indispensable car service role => RLS bypass)
+  // ✅ 3bis) plus d’ownership : on vérifie juste que le projet existe
   const { data: projectRow, error: projErr } = await supabaseAdmin
     .from("projects")
-    .select("id, user_id")
+    .select("id")
     .eq("id", projectId)
     .maybeSingle();
 
@@ -64,12 +60,8 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!projectRow) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
-  if (String(projectRow.user_id) !== String(user.id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
 
   // 4) Source de vérité: on met "processing" en base
-  // (permet au polling de continuer jusqu'à "done"/"failed")
   const { error: updErr } = await supabaseAdmin
     .from("Results")
     .update({ reprocess_status: "processing" })
@@ -83,7 +75,6 @@ export async function POST(req: Request, ctx: Ctx) {
   // 5) URL webhook n8n
   const webhookUrl = process.env.N8N_REPROCESS_WEBHOOK_URL;
   if (!webhookUrl) {
-    // rollback best-effort
     await supabaseAdmin
       .from("Results")
       .update({ reprocess_status: "failed" })
@@ -99,9 +90,7 @@ export async function POST(req: Request, ctx: Ctx) {
   // 6) callbackUrl
   const baseUrl =
     process.env.APP_BASE_URL ||
-    (process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000");
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
   const callbackUrl = `${baseUrl}/api/projects/${projectId}/reprocess/callback`;
 
@@ -115,7 +104,6 @@ export async function POST(req: Request, ctx: Ctx) {
       user: {
         id: user.id,
         email: user.email,
-        // si tu veux un nom, tu peux le stocker dans user_metadata à l'inscription
         name:
           (user.user_metadata?.full_name as string | undefined) ??
           (user.user_metadata?.name as string | undefined) ??
@@ -125,7 +113,7 @@ export async function POST(req: Request, ctx: Ctx) {
     }),
   });
 
-  // 8) Si n8n KO -> on repasse en failed en base
+  // 8) Si n8n KO -> failed
   if (!res.ok) {
     const t = await res.text().catch(() => "");
 
@@ -141,7 +129,6 @@ export async function POST(req: Request, ctx: Ctx) {
     );
   }
 
-  // n8n peut répondre JSON ou texte
   const text = await res.text().catch(() => "");
   try {
     return NextResponse.json({ ok: true, n8n: JSON.parse(text), callbackUrl });
