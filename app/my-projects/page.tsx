@@ -130,9 +130,6 @@ export default async function MyProjectsPage() {
                   ? `/projects/${project.id}/results`
                   : null;
 
-              const isOwner =
-                project.user_id != null &&
-                String(project.user_id) === String(user.id);
 
               return (
                 <div
@@ -187,7 +184,7 @@ export default async function MyProjectsPage() {
                     <ProjectActions
                       projectId={String(project.id)}
                       currentName={project.name || "Projet sans nom"}
-                      disabled={status === "processing" || !isOwner}
+                      disabled={status === "processing" }
                     />
                   </div>
                 </div>
