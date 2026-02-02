@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 
@@ -117,6 +116,35 @@ function buildColumns(rows: Row[]): string[] {
   return [...ordered, ...rest];
 }
 
+async function fetchAllResultsPages(projectId: string, pageSize = 1000): Promise<Row[]> {
+    let page = 0;
+    let all: Row[] = [];
+
+    while (true) {
+      const res = await fetch(
+        `/api/projects/${projectId}/prevalidation?table=Results&page=${page}&pageSize=${pageSize}`,
+        { cache: "no-store" }
+      );
+
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error(`Fetch page ${page} failed: ${res.status} ${t}`);
+      }
+
+      const json: ResultsResponse = await res.json();
+      const chunk = json?.rows ?? [];
+
+      all = all.concat(chunk);
+
+      if (chunk.length < pageSize) break;
+      page += 1;
+
+      if (page > 50) break; // sécurité
+    }
+
+    return all;
+  }
+
 /* ===================== RETRAITEMENT LABELS ===================== */
 
 function mapRetraitementStatus(raw: any): {
@@ -208,11 +236,31 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
   const [sendingRowId, setSendingRowId] = useState<string | null>(null);
   const [trackedProcessing, setTrackedProcessing] = useState<Record<string, true>>({});
 
+  const trackedProcessingRef = useRef<Record<string, true>>({});
+const showResultsRef = useRef<boolean>(showResults);
+
+useEffect(() => {
+    showResultsRef.current = showResults;
+  }, [showResults]);
+
+  // setter “safe” : met à jour state + ref en même temps
+  const setTrackedProcessingSafe = useCallback(
+    (updater: (prev: Record<string, true>) => Record<string, true>) => {
+      setTrackedProcessing((prev) => {
+        const next = updater(prev);
+        trackedProcessingRef.current = next;
+        return next;
+      });
+    },
+    []
+  );
+
+
   const sendSingleToN8n = useCallback(
     async (rowId: string, category: ActivityCategory, userHint: string) => {
       try {
         setSendingRowId(rowId);
-        setTrackedProcessing((prev) => ({ ...prev, [String(rowId)]: true }));
+        setTrackedProcessingSafe((prev) => ({ ...prev, [String(rowId)]: true }));
 
         // Optimistic UI: passe la ligne en "processing"
         setData((prev) => {
@@ -392,6 +440,9 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
     [columnToSortKey]
   );
 
+  
+
+
   const sortedResults = useMemo(() => {
     const base = [...(resultsRows ?? [])];
 
@@ -527,6 +578,8 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
   /* ---------- poll ---------- */
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastResultsFetchAtRef = useRef<number>(0);
+  const resultsLoadedOnceRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (!projectId) return;
@@ -540,29 +593,37 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
     const poll = async () => {
       try {
-        const [resPreval, resResults, resEvents] = await Promise.all([
+        const [resPreval, resEvents] = await Promise.all([
           fetch(`/api/projects/${projectId}/prevalidation`, { cache: "no-store" }),
-          fetch(`/api/projects/${projectId}/prevalidation?table=Results`, { cache: "no-store" }),
           fetch(`/api/projects/${projectId}/events?limit=15`, { cache: "no-store" }),
         ]);
 
         const json: ApiResponse = await resPreval.json();
-        const jsonResults: ResultsResponse = await resResults.json();
         const jsonEvents = await resEvents.json().catch(() => null);
-        setEvents(Array.isArray(jsonEvents?.events) ? jsonEvents.events : []);
-
 
         if (cancelled) return;
 
         setData(json);
-        setResultsRows(jsonResults.rows ?? []);
+        setEvents(Array.isArray(jsonEvents?.events) ? jsonEvents.events : []);
 
-        setTrackedProcessing((prev) => {
+        // Est-ce qu'on est en mode "Results affichés" ?
+        const isReadyOrShowing =
+          json.project?.status === "ready" ||
+          json.project?.status === "locked" ||
+          showResultsRef.current;
+
+        // Est-ce qu'il y a du retraitement en cours ?
+        const hasRunning = (json.Results ?? []).some((r: any) => {
+          const s = String(r?.reprocess_status ?? "").trim().toLowerCase();
+          return s === "processing";
+        });
+
+        // Nettoyage des IDs suivis (processing -> done/failed)
+        setTrackedProcessingSafe((prev) => {
           const ids = Object.keys(prev);
           if (ids.length === 0) return prev;
 
           const next = { ...prev };
-
           for (const id of ids) {
             const status = String(
               (json.Results ?? []).find((r: any) => String(r?.id) === String(id))?.reprocess_status ?? ""
@@ -570,33 +631,37 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
               .trim()
               .toLowerCase();
 
-            // Si on a un statut et qu'il n'est plus processing => on arrête de suivre
-            if (status && status !== "processing") {
-              delete next[id];
-            }
+            if (status && status !== "processing") delete next[id];
           }
-
           return next;
         });
 
-        const hasRunning = (json.Results ?? []).some((r: any) => {
-          const s = String(r?.reprocess_status ?? "").trim().toLowerCase();
-          return s === "processing";
-        });
+        const stillTracked = Object.keys(trackedProcessingRef.current).length > 0;
+        const shouldRefreshResults = isReadyOrShowing && (hasRunning || stillTracked || !resultsLoadedOnceRef.current);
 
-        if (!showResults) {
+        // ✅ On ne recharge les 2000 lignes que si nécessaire
+        if (shouldRefreshResults) {
+          const now = Date.now();
+          const minDelayMs = 2000; // tu peux monter à 5000 si tu veux alléger
+
+          if (now - lastResultsFetchAtRef.current >= minDelayMs) {
+            lastResultsFetchAtRef.current = now;
+            const rows = await fetchAllResultsPages(projectId, 1000);
+            if (cancelled) return;
+            setResultsRows(rows);
+            resultsLoadedOnceRef.current = true;
+          }
+        }
+
+        if (!showResultsRef.current) {
           if (json.project?.status !== "ready" && json.project?.status !== "locked") {
             pollTimerRef.current = setTimeout(poll, 2000);
           }
           return;
         }
 
-        // En Results: on continue tant que du retraitement tourne
-        const shouldKeepPolling = hasRunning || Object.keys(trackedProcessing).length > 0;
-
-        if (shouldKeepPolling) {
-          pollTimerRef.current = setTimeout(poll, 2000);
-        }
+        // En Results: refresh régulier (léger)
+        pollTimerRef.current = setTimeout(poll, 5000);
       } catch {
         if (!cancelled) pollTimerRef.current = setTimeout(poll, 3000);
       }
@@ -611,7 +676,8 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
         pollTimerRef.current = null;
       }
     };
-  }, [projectId, showResults, trackedProcessing]);
+  }, [projectId, setTrackedProcessingSafe]);
+
 
   return (
     <div className="space-y-4">
@@ -969,6 +1035,9 @@ function Section({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState<boolean>(collapsible ? !!defaultOpen : true);
+
+  
+
 
   useEffect(() => {
     if (!collapsible) setOpen(true);

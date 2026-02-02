@@ -18,7 +18,6 @@ const ECO = {
 };
 
 // ---------- Helpers
-
 const monetaryRe = /kg\s*co2e\s*\/\s*(k?euro|€|k€)/i;
 
 const sumEmissions = (arr: any[]) =>
@@ -27,6 +26,7 @@ const sumEmissions = (arr: any[]) =>
 function getCategory(r: any) {
   return String(r?.["catégorie"] ?? r?.categorie ?? r?.category ?? "Sans catégorie").trim();
 }
+
 
 function normalizeCategory(s: string) {
   return s
@@ -196,6 +196,8 @@ function EmissionsDonutTooltip({
   const kg = Number(item?.value ?? 0);
   const percent = Number(item?.payload?.percent ?? NaN);
   const lines = Number(item?.payload?.lines ?? NaN);
+  console.log("payload /results", payload);
+
 
   return (
     <div className="rounded-xl border border-emerald-950/10 bg-white px-3 py-2 shadow-sm">
@@ -501,6 +503,7 @@ function getPoidsCarbone(row: any): number | null {
 }
 
 export default function ResultsPanel({ projectId }: ResultsPanelProps) {
+  
   const router = useRouter();
   const [rows, setRows] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -508,8 +511,12 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
   const [showAllCats, setShowAllCats] = useState(false);
 
   
+  
+
+  
 
   useEffect(() => {
+    
     let alive = true;
 
     async function load() {

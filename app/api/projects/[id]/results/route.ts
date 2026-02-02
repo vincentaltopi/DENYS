@@ -33,15 +33,36 @@ export async function GET(_req: Request, ctx: Ctx) {
   }
 
 
-  // 3) Read results for this project only
-  const { data, error } = await supabase
-    .from("Results")
-    .select("*")
-    .eq("project_id", projectId);
+// 3) Read ALL results for this project (pagination Supabase)
+  const PAGE_SIZE = 1000;
+  let page = 0;
+  let all: any[] = [];
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  while (true) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data, error } = await supabase
+      .from("Results")
+      .select("*")
+      .eq("project_id", projectId)
+      .range(from, to);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const chunk = data ?? [];
+    all = all.concat(chunk);
+
+    if (chunk.length < PAGE_SIZE) break;
+    page += 1;
+
+    // sécurité anti boucle infinie
+    if (page > 100) break;
   }
+  console.log(all.length)
 
-  return NextResponse.json({ results: data ?? [] });
+  return NextResponse.json({ results: all });
+
 }
