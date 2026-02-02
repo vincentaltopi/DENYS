@@ -12,9 +12,6 @@ async function assertProjectOwner(projectId: string, userId: string) {
   if (error || !data) {
     return { ok: false as const, status: 404, error: "Project not found" };
   }
-  if (String(data.user_id) !== String(userId)) {
-    return { ok: false as const, status: 403, error: "Forbidden" };
-  }
   return { ok: true as const, project: data };
 }
 
