@@ -1247,65 +1247,74 @@ function DataTable({
   return (
     <div className="w-full max-h-[70vh] overflow-x-auto overflow-y-auto rounded-lg border border-emerald-950/10">
       <div className="w-full">
-        <table className="w-full table-fixed text-xs font-normal text-slate-700 border-collapse">
-            <colgroup>
-              {enableSelection && <col style={{ width: "40px" }} />}
-              {enableRetry && <col style={{ width: "40px" }} />}
+        <table className="w-full min-w-[1400px] table-fixed text-xs font-normal text-slate-700 border-collapse">
+          <colgroup>
+            {enableSelection && <col style={{ width: "40px" }} />}
+            {enableRetry && <col style={{ width: "40px" }} />}
 
-              {columnsToUse.map((c) => {
-                if (c === "activité") return <col key={c} style={{ width: "220px" }} />;
-                if (c === "commentaire") return <col key={c} style={{ width: "320px" }} />;
-                if (c === "commentaire_base") return <col key={c} style={{ width: "320px" }} />;
-                return <col key={c} />; // auto
-              })}
-            </colgroup>
+            {columnsToUse.map((c) => {
+              if (c === "activité") return <col key={c} style={{ width: "220px" }} />;
+              if (c === "commentaire") return <col key={c} style={{ width: "320px" }} />;
+              if (c === "commentaire_base") return <col key={c} style={{ width: "320px" }} />;
+
+              if (c === "unité_post") return <col key={c} style={{ width: "90px" }} />; // Unité FE
+              if (c === "score_émission") return <col key={c} style={{ width: "90px" }} />; // FE
+              if (c === "nom_base") return <col key={c} style={{ width: "200px" }} />;
+
+              return <col key={c} style={{ width: "140px" }} />; // défaut
+            })}
+          </colgroup>
           <thead className="sticky top-0 bg-emerald-50">
             <tr>
               {enableSelection && <th className="w-10 px-2 py-2 text-left" />}
               {enableRetry && <th className="w-10 px-2 py-2 text-left" />}
 
               {columnsToUse.map((c) => (
-                <th key={c} className="px-2 py-2 text-left text-xs font-normal text-slate-600 whitespace-nowrap">
+              <th
+                key={c}
+                className="px-2 py-2 text-left text-xs font-normal text-slate-600 overflow-hidden"
+              >
+                <div className="w-full min-w-0 overflow-hidden">
+                  {/* ton contenu actuel (span ou button) */}
                   {(() => {
                     const label = COLUMN_LABELS[c] ?? c;
-
                     const k = sortKeyForColumn(c);
                     const isSortable = k !== "none" && !!onHeaderSortClick;
                     const active = isSortable && sortKey === k;
                     const arrow = active ? (sortDir === "desc" ? "▼" : "▲") : "↕";
 
-                    if (!isSortable) return label;
+                    if (!isSortable) {
+                      return (
+                        <span className="block w-full min-w-0 truncate" title={label}>
+                          {label}
+                        </span>
+                      );
+                    }
 
                     return (
                       <button
                         type="button"
                         onClick={() => onHeaderSortClick?.(c)}
                         className={[
-                          "inline-flex items-center gap-2 rounded-lg px-2 py-1 transition",
-                          "border",
+                          "flex w-full min-w-0 items-center gap-2 rounded-lg px-2 py-1 transition",
+                          "border overflow-hidden",               // ✅ important
                           active
                             ? "border-emerald-600/30 bg-emerald-100 text-emerald-800 shadow-sm"
                             : "border-transparent hover:border-emerald-950/10 hover:bg-emerald-100/50",
                         ].join(" ")}
-                        title={
-                          active
-                            ? `Tri: ${sortDir === "desc" ? "décroissant" : "croissant"}`
-                            : "Trier (1er clic: décroissant, 2e: croissant)"
-                        }
                       >
-                        <span className={active ? "underline decoration-emerald-700/40 underline-offset-4" : ""}>
-                          {label}
-                        </span>
-                        <span className={active ? "opacity-100" : "opacity-40"}>{arrow}</span>
+                        <span className="min-w-0 flex-1 truncate">{label}</span>
+                        <span className="shrink-0">{arrow}</span>
                         {active && (
-                          <span className="ml-1 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-bold text-emerald-900/80">
+                          <span className="shrink-0 ml-1 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-bold text-emerald-900/80">
                             {sortDir === "desc" ? "DESC" : "ASC"}
                           </span>
                         )}
                       </button>
                     );
                   })()}
-                </th>
+                </div>
+              </th>
               ))}
             </tr>
           </thead>
@@ -1439,17 +1448,15 @@ function DataTable({
                               .replace(/€/g, "")
                               .replace(/,/g, ".")
                           );
-
-                      return (
-                        <td key={col} className="px-2 py-2 whitespace-nowrap">
-                          {Number.isFinite(n)
-                            ? n.toLocaleString("fr-FR", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })
-                            : "—"}
-                        </td>
-                      );
+                        return (
+                          <td key={col} className="px-2 py-2 overflow-hidden">
+                            <div className="w-full min-w-0 truncate">
+                              {Number.isFinite(n)
+                                ? n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                : "—"}
+                            </div>
+                          </td>
+                        );
                     }
 
                     // Émissions → 2 décimales
@@ -1461,15 +1468,13 @@ function DataTable({
                               .replace(/\s/g, "")
                               .replace(/,/g, ".")
                           );
-
                       return (
-                        <td key={col} className="px-2 py-2 whitespace-nowrap">
-                          {Number.isFinite(n)
-                            ? n.toLocaleString("fr-FR", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })
-                            : "—"}
+                        <td key={col} className="px-2 py-2 overflow-hidden">
+                          <div className="w-full min-w-0 truncate">
+                            {Number.isFinite(n)
+                              ? n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                              : "—"}
+                          </div>
                         </td>
                       );
                     }
@@ -1478,28 +1483,14 @@ function DataTable({
                     const v = row?.[col];
                     const s = formatCell(v);
 
-
-                    const w = TRUNCATE_WIDTH[col];
-
+                    const isTrunc = col === "activité" || col === "commentaire" || col === "commentaire_base";
                     return (
-                      <td key={col} className="px-2 py-2 align-top">
-                        <span
-                          style={{
-                            display: "block",
-                            width: w ? `${w}px` : undefined,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                          title={s}
-                        >
+                      <td key={col} className="px-2 py-2 align-top overflow-hidden">
+                        <div className="w-full min-w-0 truncate" title={s}>
                           {s}
-                        </span>
+                        </div>
                       </td>
                     );
-
-
-
                     })}
                   </tr>
                 );
