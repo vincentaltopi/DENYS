@@ -155,6 +155,7 @@ function SubcatEmissionsTooltip({
   const emissions = Number(item?.value ?? 0);
   const percent = Number(item?.payload?.percent ?? NaN);
   const lines = Number(item?.payload?.lines ?? NaN);
+  console.log(payload[0])
 
   return (
     <div className="rounded-xl border border-emerald-950/10 bg-white px-3 py-2 shadow-sm">

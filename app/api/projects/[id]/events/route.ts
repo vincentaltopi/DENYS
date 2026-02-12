@@ -25,10 +25,8 @@ export async function GET(
 
   const { data, error } = await supabaseAdmin
     .from("project_events")
-    .select("id,type,message,created_at")
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .select("project_id,message,created_at,execution_id,type,source_node,source_workflow")
+    .eq("project_id", projectId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

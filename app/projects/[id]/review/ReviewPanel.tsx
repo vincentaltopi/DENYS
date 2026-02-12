@@ -692,8 +692,11 @@ useEffect(() => {
             <div className="text-emerald-950/60">En attente des premiers messages…</div>
           ) : (
             <div className="space-y-1">
-              {events.map((e) => (
-                <div key={e.id} className="flex gap-2">
+              {events.map((e, idx) => (
+                <div
+                  key={`evt-${String(e.id ?? "")}-${String(e.created_at ?? "")}-${idx}`}
+                  className="flex gap-2"
+                >
                   <div className="w-[70px] shrink-0 font-mono text-emerald-950/50">
                     {new Date(e.created_at).toLocaleTimeString("fr-FR")}
                   </div>
@@ -1232,10 +1235,30 @@ function DataTable({
       return n;
     });
 
+
+  const TRUNCATE_WIDTH: Record<string, number> = {
+    activité: 220,
+    commentaire: 320,
+    commentaire_base: 320,
+  };
+
+
+
   return (
     <div className="w-full max-h-[70vh] overflow-x-auto overflow-y-auto rounded-lg border border-emerald-950/10">
-      <div className="min-w-max">
-        <table className="w-full text-xs font-normal text-slate-700 border-collapse">
+      <div className="w-full">
+        <table className="w-full table-fixed text-xs font-normal text-slate-700 border-collapse">
+            <colgroup>
+              {enableSelection && <col style={{ width: "40px" }} />}
+              {enableRetry && <col style={{ width: "40px" }} />}
+
+              {columnsToUse.map((c) => {
+                if (c === "activité") return <col key={c} style={{ width: "220px" }} />;
+                if (c === "commentaire") return <col key={c} style={{ width: "320px" }} />;
+                if (c === "commentaire_base") return <col key={c} style={{ width: "320px" }} />;
+                return <col key={c} />; // auto
+              })}
+            </colgroup>
           <thead className="sticky top-0 bg-emerald-50">
             <tr>
               {enableSelection && <th className="w-10 px-2 py-2 text-left" />}
@@ -1300,6 +1323,9 @@ function DataTable({
             ) : (
               rows.map((row: Row, idx: number) => {
                 const id = getRowId(row);
+                const rowKey = id && id !== "undefined" && id !== "null"
+                  ? `row-${id}`
+                  : `row-fallback-${idx}`;
                 const checked = selected.has(id);
 
                 const needsCheck = !!row?.a_verif;
@@ -1310,7 +1336,7 @@ function DataTable({
 
                 return (
                   <tr
-                    key={String(row?.id ?? idx)}
+                    key={rowKey}
                     onClick={() => {
                       if (!enableSelection) return;
                       if (!selectable) return;
@@ -1450,11 +1476,29 @@ function DataTable({
 
                     // fallback par défaut
                     const v = row?.[col];
+                    const s = formatCell(v);
+
+
+                    const w = TRUNCATE_WIDTH[col];
+
                     return (
-                      <td key={col} className="px-2 py-2 whitespace-nowrap">
-                        {formatCell(v)}
+                      <td key={col} className="px-2 py-2 align-top">
+                        <span
+                          style={{
+                            display: "block",
+                            width: w ? `${w}px` : undefined,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                          title={s}
+                        >
+                          {s}
+                        </span>
                       </td>
-                      );
+                    );
+
+
 
                     })}
                   </tr>

@@ -110,15 +110,6 @@ export default async function ProjectReviewPage({ params }: PageProps) {
 
           <div className="rounded-2xl border border-emerald-950/10 bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <ReviewPanel projectId={projectId} />
-
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-              <a
-                href="/upload"
-                className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
-              >
-                ← Retour à l’upload
-              </a>
-            </div>
           </div>
         </div>
       </section>

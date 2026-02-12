@@ -17,7 +17,7 @@ export async function GET(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // ✅ plus d’ownership check : on vérifie juste que le projet existe
+  // plus d’ownership check : on vérifie juste que le projet existe
   const { data: project, error: projectErr } = await supabaseAdmin
     .from("projects")
     .select("id,status,name,user_id") // mets les champs que tu veux renvoyer
@@ -64,7 +64,7 @@ export async function GET(req: Request, ctx: Ctx) {
     .from("Results")
     .select("*")
     .eq("project_id", projectId)
-    .order("a_verif", { ascending: true }).limit(5000);
+    .order("a_verif", { ascending: true });
 
   if (resultsErr) return NextResponse.json({ error: resultsErr.message }, { status: 500 });
 
