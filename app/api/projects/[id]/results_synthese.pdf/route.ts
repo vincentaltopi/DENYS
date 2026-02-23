@@ -616,7 +616,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     } else {
       const chromiumUrl =
         process.env.CHROMIUM_PACK_URL ??
-        "https://github.com/Sparticuz/chromium/releases/download/v143.0.0/chromium-v143.0.0-pack.tar";
+        "https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.x64.tar";
       executablePath = await chromium.executablePath(chromiumUrl);
       launchArgs = chromium.args;
     }
