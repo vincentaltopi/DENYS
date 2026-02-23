@@ -5,9 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const CATEGORY_FIELD = "catégorie";
-
-const CATEGORIES = [
+const ALLOWED = new Set([
   "Achat matériel",
   "Location matériel",
   "Location véhicule",
@@ -16,13 +14,11 @@ const CATEGORIES = [
   "Prestation",
   "Assurance",
   "Annexe",
-] as const;
+]);
 
-function sheetNameSafe(name: string) {
-  return name.replace(/[:\\/?*\[\]]/g, "-").slice(0, 31);
-}
+const CATEGORY_FIELD = "catégorie";
 
-async function fetchAllResults(projectId: string) {
+async function fetchAllByCategory(projectId: string, category: string) {
   const pageSize = 1000;
   let from = 0;
   const all: any[] = [];
@@ -32,6 +28,7 @@ async function fetchAllResults(projectId: string) {
       .from("Results")
       .select("*")
       .eq("project_id", projectId)
+      .eq(CATEGORY_FIELD, category)
       .order("id", { ascending: true })
       .range(from, from + pageSize - 1);
 
@@ -47,44 +44,42 @@ async function fetchAllResults(projectId: string) {
   return all;
 }
 
+function filenameSlug(category: string) {
+  return category
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // enlève les accents
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: projectId } = await params;
 
-    const rows = await fetchAllResults(projectId);
+    const category = req.nextUrl.searchParams.get("category") ?? "";
+    if (!ALLOWED.has(category)) {
+      return new Response("Catégorie invalide", { status: 400 });
+    }
 
+    const rows = await fetchAllByCategory(projectId, category);
+
+    const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-
-    // Onglet All
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "All");
-
-    // Onglets par catégorie
-    for (const cat of CATEGORIES) {
-      const filtered = rows.filter((r) => r?.[CATEGORY_FIELD] === cat);
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.json_to_sheet(filtered),
-        sheetNameSafe(cat)
-      );
-    }
-
-    // Onglet Autres si catégories inattendues
-    const known = new Set(CATEGORIES);
-    const others = rows.filter((r) => !known.has(r?.[CATEGORY_FIELD]));
-    if (others.length) {
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(others), "Autres");
-    }
+    XLSX.utils.book_append_sheet(wb, ws, "Results");
 
     const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+
+    const slug = filenameSlug(category);
 
     return new Response(buffer, {
       headers: {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="results-${projectId}.xlsx"`,
+        "Content-Disposition": `attachment; filename="results-${projectId}-${slug}.xlsx"`,
         "Cache-Control": "no-store",
       },
     });

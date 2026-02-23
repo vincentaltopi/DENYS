@@ -75,15 +75,15 @@ export default function DownloadMenu({ projectId }: { projectId: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-emerald-950/10 bg-white shadow-lg">
+        <div className="absolute right-0 z-20 mt-2 w-72 overflow-hidden rounded-xl border border-emerald-950/10 bg-white shadow-lg">
           <a
-            href={`/api/projects/${projectId}/results_synthese.xlsx`}
+            href={`/api/projects/${projectId}/results_synthese.pdf`}
+            download
             className="block px-4 py-3 text-sm text-emerald-950/80 hover:bg-emerald-50"
             onClick={() => setOpen(false)}
           >
             <div className="font-medium">Synthèse</div>
-            <div className="text-xs text-emerald-950/50">
-            </div>
+            <div className="text-xs text-emerald-950/50">PDF (page résultats)</div>
           </a>
 
           <a
@@ -92,9 +92,32 @@ export default function DownloadMenu({ projectId }: { projectId: string }) {
             onClick={() => setOpen(false)}
           >
             <div className="font-medium">Fichier complet</div>
-            <div className="text-xs text-emerald-950/50">
-            </div>
           </a>
+
+          <div className="h-px bg-emerald-950/10" />
+
+          {[
+            "Achat matériel",
+            "Location matériel",
+            "Location véhicule",
+            "Fret",
+            "Energie",
+            "Prestation",
+            "Assurance",
+            "Annexe",
+          ].map((cat) => (
+            <a
+              key={cat}
+              href={`/api/projects/${projectId}/results_by_category.xlsx?category=${encodeURIComponent(
+                cat
+              )}`}
+              className="block px-4 py-3 text-sm text-emerald-950/80 hover:bg-emerald-50"
+              onClick={() => setOpen(false)}
+            >
+              <div className="font-medium">{cat}</div>
+              <div className="text-xs text-emerald-950/50">1 fichier Excel</div>
+            </a>
+          ))}
         </div>
       )}
     </div>

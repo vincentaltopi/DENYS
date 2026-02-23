@@ -1011,7 +1011,9 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
           ← Retour à l’accueil
         </button>
         </div>
-
+        {!loading && !error && (
+      <div data-print-ready="true" />
+    )}
     </div>
   );
 }
