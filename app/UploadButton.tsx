@@ -20,7 +20,7 @@ type SignDownloadResponse =
 type UploadedFileInfo = {
   bucket: string;
   path: string;
-  signedDownloadUrl: string; // ✅ on le renvoie vraiment
+  signedDownloadUrl: string; 
 };
 
 function safeTag(tag: string) {
@@ -228,7 +228,7 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
       <div className="flex flex-wrap gap-3">
         <button
           onClick={handleUpload}
-          disabled={!projectFile || !supplierFile}
+          disabled={!projectFile}
           className="inline-flex items-center justify-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Créer le projet
