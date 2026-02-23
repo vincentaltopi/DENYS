@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import chromium from "@sparticuz/chromium";
+import chromium from "@sparticuz/chromium-min";
 import puppeteerCore from "puppeteer-core";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { access } from "node:fs/promises";
@@ -614,7 +614,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       executablePath = found;
       launchArgs = ["--no-sandbox", "--disable-setuid-sandbox"];
     } else {
-      executablePath = await chromium.executablePath();
+      const chromiumUrl =
+        process.env.CHROMIUM_PACK_URL ??
+        "https://github.com/Sparticuz/chromium/releases/download/v143.0.0/chromium-v143.0.0-pack.tar";
+      executablePath = await chromium.executablePath(chromiumUrl);
       launchArgs = chromium.args;
     }
 

@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
-  serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium", "pdfkit"],
+  serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium-min", "pdfkit"],
 };
 
 
