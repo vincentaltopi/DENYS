@@ -1,8 +1,9 @@
 // app/api/projects/[id]/results/assurance.xlsx/route.ts
 import { NextRequest } from "next/server";
-import { buildXlsxResponseByCategory, runtime, dynamic } from "../_export";
+import { buildXlsxResponseByCategory } from "../_export";
 
-export { runtime, dynamic };
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(
   _req: NextRequest,
