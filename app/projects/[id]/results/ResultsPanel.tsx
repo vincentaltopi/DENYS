@@ -602,22 +602,27 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
 
   // ---------- Donut: émissions par catégorie (top 8 + Autres), sans "Sans catégorie"
   const emissionsParCategorieDonut = useMemo(() => {
-    const byCat = new Map<string, { emissions: number; lines: number }>();
+    const byCat = new Map<string, { emissions: number; lines: number; name: string }>();
 
     for (const r of rows) {
-      const cat = getCategory(r);
-      if (cat === "Sans catégorie") continue;
+      const rawCat = getCategory(r);
+      if (rawCat === "Sans catégorie") continue;
 
+      const key = normalizeCategory(rawCat);
       const v = getPoidsCarbone(r);
 
-      const curr = byCat.get(cat) ?? { emissions: 0, lines: 0 };
+      const prev = byCat.get(key);
+      // Préférer la version accentuée comme nom d'affichage
+      const name = !prev || /[À-ÿ]/.test(rawCat) ? rawCat : prev.name;
+      const curr = prev ?? { emissions: 0, lines: 0, name };
+      curr.name = name;
       curr.lines += 1;
       curr.emissions += v ?? 0;
-      byCat.set(cat, curr);
+      byCat.set(key, curr);
     }
 
-    const all = Array.from(byCat.entries())
-      .map(([name, obj]) => ({ name, value: obj.emissions, lines: obj.lines }))
+    const all = Array.from(byCat.values())
+      .map((obj) => ({ name: obj.name, value: obj.emissions, lines: obj.lines }))
       .filter((d) => d.value > 0)
       .sort((a, b) => b.value - a.value);
 
@@ -723,9 +728,9 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
 
     const piePresta: PieDatum[] = [
       { name: "FE monétaire", value: sumEmissions(prestamonetary), lines: prestamonetary.length },
-      { name: "Non valorisées", value: sumEmissions(prestanotfound), lines: prestanotfound.length },
       { name: "FE Fournisseur", value: sumEmissions(prestabysupplier), lines: prestabysupplier.length },
       { name: "FE par défaut", value: sumEmissions(prestabydefault), lines: prestabydefault.length },
+      { name: "Non valorisées", value: sumEmissions(prestanotfound), lines: prestanotfound.length },
     ].filter((d) => d.lines && d.lines > 0);
 
     // ---------------- Assurance
@@ -735,9 +740,9 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
     const assurancemonetary = assurancefound.filter((r) => !isDefaultAssurance(r));
 
     const pieAssurance: PieDatum[] = [
-      { name: "Non valorisées", value: sumEmissions(assurancenotfoud), lines: assurancenotfoud.length },
       { name: "FE monétaire", value: sumEmissions(assurancemonetary), lines: assurancemonetary.length },
       { name: "FE par défaut", value: sumEmissions(assurancedefault), lines: assurancedefault.length },
+      { name: "Non valorisées", value: sumEmissions(assurancenotfoud), lines: assurancenotfoud.length },
     ].filter((d) => d.lines && d.lines > 0);
 
     // ------------------- Energie
@@ -745,8 +750,8 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
     const energiefound = energie.filter((r) => !isNotFound(r));
 
     const pieEnergie: PieDatum[] = [
-      { name: "Non valorisées", value: sumEmissions(energienotfound), lines: energienotfound.length },
       { name: "FE Physique", value: sumEmissions(energiefound), lines: energiefound.length },
+      { name: "Non valorisées", value: sumEmissions(energienotfound), lines: energienotfound.length },
     ].filter((d) => d.lines && d.lines > 0);
 
     // ------------------- Fret
@@ -757,10 +762,10 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
     const fretphysic = fretfound.filter((r) => !isMonetary(r));
 
     const pieFret: PieDatum[] = [
-      { name: "Non valorisées", value: sumEmissions(fretnotfound), lines: fretnotfound.length },
       { name: "FE physique", value: sumEmissions(fretphysic), lines: fretphysic.length },
       { name: "FE monétaire", value: sumEmissions(fretmonetary), lines: fretmonetary.length },
       { name: "FE par défaut", value: sumEmissions(fretbydefault), lines: fretbydefault.length },
+      { name: "Non valorisées", value: sumEmissions(fretnotfound), lines: fretnotfound.length },
     ].filter((d) => d.lines && d.lines > 0);
 
     const pieAnnexe: PieDatum[] = [{ name: "Annexe", value: sumEmissions(annexe), lines: annexe.length }];
@@ -833,7 +838,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
         totalKg: piesByCategory.totalsKg.achat,
         lines: piesByCategory.counts.achatTotal,
         data: piesByCategory.pieAchat,
-        colors: [COLORS.emerald, COLORS.stone, COLORS.clay],
+        colors: [COLORS.emerald, COLORS.teal, COLORS.clay],
       },
       {
         key: "locMat",
@@ -841,7 +846,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
         totalKg: piesByCategory.totalsKg.locMat,
         lines: piesByCategory.counts.locMatTotal,
         data: piesByCategory.pieLocMat,
-        colors: [COLORS.emerald, COLORS.clay],
+        colors: [COLORS.amber, COLORS.clay],
       },
       {
         key: "locVeh",
@@ -849,7 +854,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
         totalKg: piesByCategory.totalsKg.locVeh,
         lines: piesByCategory.counts.locVehTotal,
         data: piesByCategory.pieLocVeh,
-        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+        colors: [COLORS.teal, COLORS.amber, COLORS.forest, COLORS.clay],
       },
       {
         key: "presta",
@@ -857,7 +862,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
         totalKg: piesByCategory.totalsKg.presta,
         lines: piesByCategory.counts.prestaTotal,
         data: piesByCategory.piePresta,
-        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+        colors: [COLORS.forest, COLORS.teal, COLORS.moss, COLORS.clay],
       },
       {
         key: "assurance",
@@ -865,7 +870,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
         totalKg: piesByCategory.totalsKg.assurance,
         lines: piesByCategory.counts.assuranceTotal,
         data: piesByCategory.pieAssurance,
-        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+        colors: [COLORS.moss, COLORS.teal, COLORS.clay],
       },
       {
         key: "energie",
@@ -873,7 +878,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
         totalKg: piesByCategory.totalsKg.energie,
         lines: piesByCategory.counts.energieTotal,
         data: piesByCategory.pieEnergie,
-        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+        colors: [COLORS.blue, COLORS.clay],
       },
       {
         key: "fret",
@@ -881,7 +886,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
         totalKg: piesByCategory.totalsKg.fret,
         lines: piesByCategory.counts.fretTotal,
         data: piesByCategory.pieFret,
-        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+        colors: [COLORS.slate, COLORS.amber, COLORS.forest, COLORS.clay],
       },
       {
         key: "annexe",
@@ -889,7 +894,7 @@ export default function ResultsPanel({ projectId }: ResultsPanelProps) {
         totalKg: piesByCategory.totalsKg.annexe,
         lines: piesByCategory.counts.annexeTotal,
         data: piesByCategory.pieAnnexe,
-        colors: [COLORS.stone, COLORS.teal, COLORS.forest],
+        colors: [COLORS.violet],
       },
     ];
 

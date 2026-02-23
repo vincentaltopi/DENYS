@@ -22,6 +22,8 @@ const C = {
   amber:   "#F59E0B",
   sage:    "#84A98C",
   moss:    "#3F6212",
+  blue:    "#0EA5E9",
+  violet:  "#8B5CF6",
 };
 const PIE_MONETARY = [C.amber, C.sage];
 const PIE_FOUND    = [C.forest, C.clay];
@@ -249,7 +251,7 @@ function buildCategories(rows: any[]) {
     {
       key: "locMat", title: "Location matériel", rows: locMat,
       slices: filterNonNull([
-        pie(locMatF,  r => !isNotFound(r), "FE monétaire",   C.emerald),
+        pie(locMatF,  r => !isNotFound(r), "FE monétaire",   C.amber),
         pie(locMatNF, isNotFound,          "Non valorisées", C.clay),
       ]),
     },
@@ -265,9 +267,9 @@ function buildCategories(rows: any[]) {
     {
       key: "presta", title: "Prestation", rows: presta,
       slices: filterNonNull([
-        pie(prestaF.filter(r => !isDefaultMonetaryUpdate(r) && !isSupplierfe(r)), () => true, "FE monétaire",   C.emerald),
+        pie(prestaF.filter(r => !isDefaultMonetaryUpdate(r) && !isSupplierfe(r)), () => true, "FE monétaire",   C.forest),
         pie(prestaF.filter(isSupplierfe),            isSupplierfe,            "FE Fournisseur", C.teal),
-        pie(prestaF.filter(isDefaultMonetaryUpdate), isDefaultMonetaryUpdate, "FE par défaut",  C.forest),
+        pie(prestaF.filter(isDefaultMonetaryUpdate), isDefaultMonetaryUpdate, "FE par défaut",  C.moss),
         pie(prestaNF, isNotFound, "Non valorisées", C.clay),
       ]),
     },
@@ -282,23 +284,23 @@ function buildCategories(rows: any[]) {
     {
       key: "energie", title: "Energie", rows: energie,
       slices: filterNonNull([
-        pie(energieF,  r => !isNotFound(r), "FE Physique",    C.emerald),
+        pie(energieF,  r => !isNotFound(r), "FE Physique",    C.blue),
         pie(energieNF, isNotFound,          "Non valorisées", C.clay),
       ]),
     },
     {
       key: "fret", title: "Fret", rows: fret,
       slices: filterNonNull([
-        pie(fretF.filter(r => !isMonetary(r)),                               r => !isMonetary(r),                               "FE physique",    C.forest),
-        pie(fretF.filter(r => isMonetary(r) && !isDefaultMonetaryUpdate(r)), r => isMonetary(r) && !isDefaultMonetaryUpdate(r), "FE monétaire",   C.teal),
-        pie(fretF.filter(isDefaultMonetaryUpdate),                           isDefaultMonetaryUpdate,                           "FE par défaut",  C.amber),
+        pie(fretF.filter(r => !isMonetary(r)),                               r => !isMonetary(r),                               "FE physique",    C.slate),
+        pie(fretF.filter(r => isMonetary(r) && !isDefaultMonetaryUpdate(r)), r => isMonetary(r) && !isDefaultMonetaryUpdate(r), "FE monétaire",   C.amber),
+        pie(fretF.filter(isDefaultMonetaryUpdate),                           isDefaultMonetaryUpdate,                           "FE par défaut",  C.forest),
         pie(fretNF, isNotFound, "Non valorisées", C.clay),
       ]),
     },
     {
       key: "annexe", title: "Annexe", rows: annexe,
       slices: filterNonNull([
-        pie(annexe, () => true, "Annexe", C.sage),
+        pie(annexe, () => true, "Annexe", C.violet),
       ]),
     },
   ]
@@ -322,17 +324,21 @@ function buildHtml(
   const monetaryPct     = foundRows.length > 0 ? (monetaryRows.length / foundRows.length) * 100 : 0;
 
   // ── Émissions par catégorie (top 8)
-  const byCatEmit = new Map<string, { v: number; lines: number }>();
+  const byCatEmit = new Map<string, { v: number; lines: number; name: string }>();
   for (const r of rows) {
-    const cat = getCat(r);
-    if (cat === "Sans catégorie") continue;
-    const curr = byCatEmit.get(cat) ?? { v: 0, lines: 0 };
+    const rawCat = getCat(r);
+    if (rawCat === "Sans catégorie") continue;
+    const key = normCat(rawCat);
+    const prev = byCatEmit.get(key);
+    const name = !prev || /[À-ÿ]/.test(rawCat) ? rawCat : prev.name;
+    const curr = prev ?? { v: 0, lines: 0, name };
+    curr.name = name;
     curr.lines++;
     curr.v += getKg(r);
-    byCatEmit.set(cat, curr);
+    byCatEmit.set(key, curr);
   }
-  const emitAll = [...byCatEmit.entries()]
-    .map(([name, o]) => ({ name, value: o.v, lines: o.lines }))
+  const emitAll = [...byCatEmit.values()]
+    .map((o) => ({ name: o.name, value: o.v, lines: o.lines }))
     .filter((d) => d.value > 0)
     .sort((a, b) => b.value - a.value);
   const top8 = emitAll.slice(0, 8);
@@ -353,24 +359,32 @@ function buildHtml(
   ];
 
   // ── Table recap
-  const groupByCat = new Map<string, any[]>();
+  const groupByCat = new Map<string, { rows: any[]; name: string }>();
   for (const r of rows) {
-    const cat = getCat(r);
-    if (!groupByCat.has(cat)) groupByCat.set(cat, []);
-    groupByCat.get(cat)!.push(r);
+    const rawCat = getCat(r);
+    const key = normCat(rawCat);
+    const prev = groupByCat.get(key);
+    const name = !prev || /[À-ÿ]/.test(rawCat) ? rawCat : prev.name;
+    if (!prev) groupByCat.set(key, { rows: [], name });
+    const entry = groupByCat.get(key)!;
+    entry.name = name;
+    entry.rows.push(r);
   }
-  const CATS = ["Achat matériel","Location matériel","Location véhicule","Fret","Energie","Prestation","Assurance","Annexe"];
-  const allCats = [...CATS, ...[...groupByCat.keys()].filter(c => !CATS.includes(c))];
+  const CATS = ["Achat matériel","Location matériel","Location véhicule","Fret","Énergie","Prestation","Assurance","Annexe"];
+  const CATS_NORM = CATS.map(normCat);
+  const allCatKeys = [...CATS_NORM, ...[...groupByCat.keys()].filter(k => !CATS_NORM.includes(k))];
   let tableRows = "";
   let tKg = 0, tLines = 0, idx = 0;
-  for (const cat of allCats) {
-    const list = groupByCat.get(cat) ?? [];
+  for (const key of allCatKeys) {
+    const entry = groupByCat.get(key);
+    const list = entry?.rows ?? [];
+    const catName = entry?.name ?? key;
     if (!list.length) continue;
     const kg = sumKg(list);
     tKg += kg; tLines += list.length;
     const bg = idx % 2 === 1 ? "background:rgba(5,46,22,.025)" : "";
     tableRows += `<tr style="${bg}">
-      <td style="padding:6px 8px;font-size:12px;color:#052e16;">${esc(cat)}</td>
+      <td style="padding:6px 8px;font-size:12px;color:#052e16;">${esc(catName)}</td>
       <td style="padding:6px 8px;font-size:12px;text-align:right;color:rgba(5,46,22,.7);">${fmtInt(list.length)}</td>
       <td style="padding:6px 8px;font-size:12px;text-align:right;color:#052e16;font-weight:600;">${fmtKg(kg)}</td>
     </tr>`;
