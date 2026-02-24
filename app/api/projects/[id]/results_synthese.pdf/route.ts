@@ -311,6 +311,7 @@ function buildCategories(rows: any[]) {
 // ─── HTML principal ────────────────────────────────────────────────────────────
 function buildHtml(
   projectId: string,
+  formattedDate: string,
   rows: any[],
   totalKg: number,
   notFoundRows: any[],
@@ -410,8 +411,25 @@ function buildHtml(
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
     background: #f9fafb;
     color: #052e16;
-    padding: 28px 32px;
+    padding: 44px 32px 28px;
     font-size: 13px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ─ Header fixe (répété sur chaque page) */
+  .pdf-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 32px;
+    font-size: 10px;
+    color: rgba(5,46,22,0.5);
+    background: white;
+    border-bottom: 1px solid rgba(5,46,22,0.12);
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -467,12 +485,17 @@ function buildHtml(
   /* ─ Print */
   @page { size: A4; margin: 18px 26px; }
   @media print {
-    .page-break { page-break-before: always; }
+    .page-break { page-break-before: always; padding-top: 44px; }
     .no-break   { page-break-inside: avoid; }
   }
 </style>
 </head>
 <body>
+
+<div class="pdf-header">
+  <span style="font-weight:600;">${esc(projectId)}</span>
+  ${formattedDate ? `<span>Créé le ${formattedDate}</span>` : ""}
+</div>
 
 <!-- ══ PAGE 1 : Synthèse ══════════════════════════════════════════════════════ -->
 <div class="section-title">Synthèse des résultats</div>
@@ -582,9 +605,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
     const [rows, projectRow] = await Promise.all([
       fetchAll(projectId),
-      supabaseAdmin.from("projects").select("name").eq("id", projectId).maybeSingle(),
+      supabaseAdmin.from("projects").select("name, created_at").eq("id", projectId).maybeSingle(),
     ]);
     const projectName = projectRow.data?.name ?? projectId;
+    const createdAt = projectRow.data?.created_at;
+    const formattedDate = createdAt
+      ? new Date(createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
+      : "";
 
     const totalKg       = sumKg(rows);
     const notFoundRows  = rows.filter(isNotFound);
@@ -594,7 +621,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const catData       = buildCategories(rows);
 
     const html = buildHtml(
-      projectName, rows, totalKg,
+      projectName, formattedDate, rows, totalKg,
       notFoundRows, foundRows, monetaryRows, physiqueRows,
       catData
     );
@@ -648,7 +675,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-      margin: { top: "18px", bottom: "18px", left: "26px", right: "26px" },
+      margin: { top: "40px", bottom: "18px", left: "26px", right: "26px" },
     });
 
     await browser.close();
