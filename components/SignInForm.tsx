@@ -12,6 +12,7 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
 
   // Détecte les tokens d'invitation / recovery dans le hash de l'URL
+  // et redirige immédiatement vers /reset-password avec le hash intact
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash) return;
@@ -19,17 +20,8 @@ export default function SignInForm() {
     const params = new URLSearchParams(hash.replace("#", ""));
     const type = params.get("type");
 
-    // Supabase SDK détecte automatiquement le hash et crée une session
-    // On écoute le changement de session pour rediriger
     if (type === "invite" || type === "recovery") {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (event) => {
-          if (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY") {
-            window.location.href = "/reset-password";
-          }
-        }
-      );
-      return () => subscription.unsubscribe();
+      window.location.replace("/reset-password" + hash);
     }
   }, []);
 
