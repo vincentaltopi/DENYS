@@ -30,6 +30,16 @@ export default function SignInForm() {
           }
         }
       );
+
+      // Fallback : si Supabase a déjà traité le token avant que le listener
+      // soit en place, la session existe déjà → on redirige immédiatement.
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          subscription.unsubscribe();
+          window.location.replace("/reset-password");
+        }
+      });
+
       return () => subscription.unsubscribe();
     }
   }, []);

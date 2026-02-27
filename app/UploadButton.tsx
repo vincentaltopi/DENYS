@@ -27,6 +27,7 @@ function safeTag(tag: string) {
   return tag.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_-]/g, "_");
 }
 
+
 export default function UploadButton({ projectName }: UploadButtonProps) {
   const router = useRouter();
 
