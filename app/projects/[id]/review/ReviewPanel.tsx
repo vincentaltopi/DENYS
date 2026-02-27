@@ -52,12 +52,12 @@ type ActivityCategory = (typeof ACTIVITY_CATEGORIES)[number];
 const DISPLAY_ORDER = [
   "catégorie",
   "activité",
-  "fournisseur",
-  "prix_total(euro)",
-  "nombre_activité",
-  "unité_activité",
   "émission_totale",
   "unité_émission_totale",
+  "prix_total(euro)",
+  "fournisseur",
+  "nombre_activité",
+  "unité_activité",
   "commentaire",
   "score_émission",
   "unité_post",
@@ -200,7 +200,7 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
   
   useEffect(() => {
-  if (data?.project?.status === "ready") {
+  if (data?.project?.status === "ready" || data?.project?.status === "locked") {
     setShowResults(true);
   }
 }, [data?.project?.status]);
@@ -350,7 +350,7 @@ useEffect(() => {
   type SortDir = "asc" | "desc";
 
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
-    key: "none",
+    key: "emission_totale",
     dir: "desc",
   });
 
@@ -654,9 +654,8 @@ useEffect(() => {
         }
 
         if (!showResultsRef.current) {
-          if (json.project?.status !== "ready" && json.project?.status !== "locked") {
-            pollTimerRef.current = setTimeout(poll, 2000);
-          }
+          // Relance un poll pour laisser le temps au useEffect de mettre showResults à true
+          pollTimerRef.current = setTimeout(poll, 2000);
           return;
         }
 

@@ -132,8 +132,8 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
       return;
     }
 
-    if (!projectFile || !supplierFile) {
-      setStatus("Sélectionne les 2 fichiers : Projet + Fournisseurs.");
+    if (!projectFile) {
+      setStatus("Sélectionne au moins le fichier projet.");
       return;
     }
 
@@ -146,30 +146,34 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
       const proj = await uploadToSupabase(projectFile, batchId, safeTag("project"));
       setStatus(`Projet stocké: ${proj.bucket}/${proj.path}`);
 
-      setStatus("Upload du fichier fournisseurs vers Supabase...");
-      const sup = await uploadToSupabase(supplierFile, batchId, safeTag("suppliers"));
-      setStatus(`Fournisseurs stocké: ${sup.bucket}/${sup.path}`);
+      const files: any[] = [
+        {
+          tag: "project",
+          bucket: proj.bucket,
+          path: proj.path,
+          signedDownloadUrl: proj.signedDownloadUrl,
+          originalName: projectFile.name,
+        },
+      ];
+
+      if (supplierFile) {
+        setStatus("Upload du fichier fournisseurs vers Supabase...");
+        const sup = await uploadToSupabase(supplierFile, batchId, safeTag("suppliers"));
+        setStatus(`Fournisseurs stocké: ${sup.bucket}/${sup.path}`);
+        files.push({
+          tag: "suppliers",
+          bucket: sup.bucket,
+          path: sup.path,
+          signedDownloadUrl: sup.signedDownloadUrl,
+          originalName: supplierFile.name,
+        });
+      }
 
       setStatus("Envoi à n8n...");
       await notifyN8n({
         projectId,
         batchId,
-        files: [
-          {
-            tag: "project",
-            bucket: proj.bucket,
-            path: proj.path,
-            signedDownloadUrl: proj.signedDownloadUrl, 
-            originalName: projectFile.name,
-          },
-          {
-            tag: "suppliers",
-            bucket: sup.bucket,
-            path: sup.path,
-            signedDownloadUrl: sup.signedDownloadUrl,
-            originalName: supplierFile.name,
-          },
-        ],
+        files,
         source: "nextjs",
         sentAt: new Date().toISOString(),
       });
@@ -184,9 +188,18 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
   return (
     <div className="grid gap-4">
       <div className="rounded-2xl border border-emerald-950/10 bg-white/90 p-4 shadow-sm">
-        <label className="mb-2 block text-sm font-medium text-emerald-950/80">
-          Fichier projet
-        </label>
+        <div className="mb-2 flex items-center gap-2">
+          <label className="text-sm font-medium text-emerald-950/80">
+            Fichier projet
+          </label>
+          <a
+            href="/templates/template-projet.xlsx"
+            download
+            className="text-xs font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900"
+          >
+            Télécharger le template
+          </a>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -205,9 +218,18 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
       </div>
 
       <div className="rounded-2xl border border-emerald-950/10 bg-white/90 p-4 shadow-sm">
-        <label className="mb-2 block text-sm font-medium text-emerald-950/80">
-          Fichier fournisseurs
-        </label>
+        <div className="mb-2 flex items-center gap-2">
+          <label className="text-sm font-medium text-emerald-950/80">
+            Fichier fournisseurs <span className="font-normal text-emerald-950/40">(optionnel)</span>
+          </label>
+          <a
+            href="/templates/template-fournisseurs.xlsx"
+            download
+            className="text-xs font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900"
+          >
+            Télécharger le template
+          </a>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <input
