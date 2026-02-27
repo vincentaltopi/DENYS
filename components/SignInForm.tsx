@@ -11,8 +11,9 @@ export default function SignInForm() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Détecte les tokens d'invitation / recovery dans le hash de l'URL
-  // et redirige immédiatement vers /reset-password avec le hash intact
+  // Détecte les tokens d'invitation / recovery dans le hash de l'URL.
+  // Attend que Supabase traite les tokens et crée la session,
+  // puis redirige vers /reset-password (session déjà dans le storage).
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash) return;
@@ -21,7 +22,15 @@ export default function SignInForm() {
     const type = params.get("type");
 
     if (type === "invite" || type === "recovery") {
-      window.location.replace("/reset-password" + hash);
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          if (session) {
+            subscription.unsubscribe();
+            window.location.replace("/reset-password");
+          }
+        }
+      );
+      return () => subscription.unsubscribe();
     }
   }, []);
 
