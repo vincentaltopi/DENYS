@@ -188,6 +188,10 @@ async function createProject(): Promise<{ projectId: string; batchId: string }> 
 
   return (
     <div className="grid gap-4">
+      <div className="rounded-2xl border border-amber-500/30 bg-amber-50/80 p-3 text-sm text-amber-900">
+        <span className="font-medium">Important :</span> les colonnes de dates dans vos fichiers Excel doivent être au format texte (et non au format « Date » d'Excel) pour garantir leur bonne lecture.
+      </div>
+
       <div className="rounded-2xl border border-emerald-950/10 bg-white/90 p-4 shadow-sm">
         <div className="mb-2 flex items-center gap-2">
           <label className="text-sm font-medium text-emerald-950/80">

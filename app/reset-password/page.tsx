@@ -7,6 +7,7 @@ import AuthShell from "@/components/auth/AuthShell";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,12 @@ export default function ResetPasswordPage() {
 
 
   async function handleUpdate() {
-    if (!password) return;
+    if (!password || !confirm) return;
+
+    if (password !== confirm) {
+      setErr("Les mots de passe ne correspondent pas.");
+      return;
+    }
 
     setErr("");
     setMsg("");
@@ -102,9 +108,18 @@ export default function ResetPasswordPage() {
                 autoComplete="new-password"
               />
 
+              <input
+                type="password"
+                placeholder="Confirmer le mot de passe"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="w-full rounded-2xl border border-emerald-950/15 bg-white/90 px-3 py-2 text-sm outline-none ring-emerald-600/25 placeholder:text-emerald-950/40 focus:bg-white focus:ring-2"
+                autoComplete="new-password"
+              />
+
               <button
                 onClick={handleUpdate}
-                disabled={!password || loading}
+                disabled={!password || !confirm || loading}
                 className="inline-flex items-center justify-center rounded-2xl bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? "Mise à jour…" : "Mettre à jour"}
