@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendProjectFailedEmail } from "@/lib/email";
 
 function requiredEnv(name: string) {
   const v = process.env[name];
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
     );
   }
 
-  await Promise.all([
+  const [eventResult, updateResult] = await Promise.all([
     supabaseAdmin.from("project_events").insert({
       project_id: projectId,
       batch_id: batchId,
@@ -59,8 +60,24 @@ export async function POST(req: Request) {
       message: String(message),
       execution_id: executionId,
     }),
-    supabaseAdmin.from("projects").update({ status: "failed" }).eq("id", projectId),
+    supabaseAdmin
+      .from("projects")
+      .update({ status: "failed" })
+      .eq("id", projectId)
+      .select("name, created_by_email")
+      .single(),
   ]);
+
+  // Envoyer l'email de notification d'échec (fire-and-forget)
+  const project = updateResult.data;
+  if (project?.created_by_email) {
+    sendProjectFailedEmail({
+      to: project.created_by_email,
+      projectName: project.name ?? "Projet sans nom",
+      projectId: projectId!,
+      errorMessage: String(message),
+    }).catch((err) => console.error("[error] Email send error:", err));
+  }
 
   return NextResponse.json({ ok: true });
 }
