@@ -22,25 +22,21 @@ export default function SignInForm() {
     const type = params.get("type");
 
     if (type === "invite" || type === "recovery") {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (_event, session) => {
-          if (session) {
-            subscription.unsubscribe();
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+
+      if (accessToken && refreshToken) {
+        // createBrowserClient (SSR) utilise flowType: 'pkce' par défaut,
+        // donc les tokens du hash ne sont PAS traités automatiquement.
+        // On crée la session manuellement puis on redirige.
+        supabase.auth
+          .setSession({ access_token: accessToken, refresh_token: refreshToken })
+          .then(() => {
             window.location.replace("/reset-password");
-          }
-        }
-      );
+          });
+      }
 
-      // Fallback : si Supabase a déjà traité le token avant que le listener
-      // soit en place, la session existe déjà → on redirige immédiatement.
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          subscription.unsubscribe();
-          window.location.replace("/reset-password");
-        }
-      });
-
-      return () => subscription.unsubscribe();
+      return;
     }
   }, []);
 
