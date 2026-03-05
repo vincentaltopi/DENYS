@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createSupabaseServerClient();
   const {
@@ -16,7 +16,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const { id } = await Promise.resolve(params);
+  const { id } = await params;
   const body = await req.json().catch(() => ({}));
   const role: "admin" | "user" = body?.role === "admin" ? "admin" : "user";
 
