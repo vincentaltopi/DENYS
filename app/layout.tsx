@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Altopi",
   description: "Évaluateur Carbone des Projets",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({
