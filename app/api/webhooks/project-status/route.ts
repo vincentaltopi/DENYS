@@ -38,11 +38,11 @@ export async function POST(req: Request) {
   const projectId = String(record.id);
 
   if (record.status === "ready") {
-    sendProjectReadyEmail({ to: email, projectName, projectId }).catch((err) =>
+    await sendProjectReadyEmail({ to: email, projectName, projectId }).catch((err) =>
       console.error("[webhook] Email send error (ready):", err)
     );
   } else if (record.status === "failed") {
-    sendProjectFailedEmail({
+    await sendProjectFailedEmail({
       to: email,
       projectName,
       projectId,
