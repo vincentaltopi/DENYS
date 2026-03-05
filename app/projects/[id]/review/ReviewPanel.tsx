@@ -685,28 +685,6 @@ useEffect(() => {
         <div className="mb-2 text-sm font-medium text-emerald-950/80">
           Traitement en cours…
         </div>
-
-        <div className="max-h-40 overflow-y-auto rounded-lg border border-emerald-950/10 bg-emerald-50/30 p-2 text-xs">
-          {events.length === 0 ? (
-            <div className="text-emerald-950/60">En attente des premiers messages…</div>
-          ) : (
-            <div className="space-y-1">
-              {events.map((e, idx) => (
-                <div
-                  key={`evt-${String(e.id ?? "")}-${String(e.created_at ?? "")}-${idx}`}
-                  className="flex gap-2"
-                >
-                  <div className="w-[70px] shrink-0 font-mono text-emerald-950/50">
-                    {new Date(e.created_at).toLocaleTimeString("fr-FR")}
-                  </div>
-                  <div className={String(e.type).toLowerCase() === "error" ? "text-rose-700" : "text-emerald-950/80"}>
-                    {e.message}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     ) : null}
 
