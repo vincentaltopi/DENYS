@@ -24,6 +24,7 @@ export default async function HomePage() {
 
   const email = user.email ?? "";
   const initial = name.charAt(0).toUpperCase();
+  const isAdmin = user.app_metadata?.role === "admin";
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -52,7 +53,7 @@ export default async function HomePage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <AccountMenu name={name} email={email} initial={initial} />
+            <AccountMenu name={name} email={email} initial={initial} isAdmin={isAdmin} />
             <LogoutButton iconOnly />
           </div>
         </div>

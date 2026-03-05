@@ -27,22 +27,29 @@ export default async function ProjectResultsPage({ params }: PageProps) {
     redirect(`/?returnTo=/projects/${id}/results`);
   }
 
+  const isAdmin = user.app_metadata?.role === "admin";
+
   // Récupération nom projet (même pattern que review)
   const { data: project, error: projectError } = await supabase
       .from("projects")
-      .select("id,name,user_id")
+      .select("id,name,user_id,is_admin_project")
       .eq("id", id)
       .maybeSingle();
-  
+
     if (projectError) {
       console.error("Error fetching project name:", projectError.message);
     }
-  
+
+    // Projet admin → accessible aux admins seulement
+    if (project?.is_admin_project && !isAdmin) {
+      redirect("/my-projects");
+    }
+
     // Fallback minimal: si le user client ne voit pas le projet, on lit en admin
     // MAIS on vérifie l'ownership avant d'utiliser le nom (sinon redirect menu).
     let projectName = project?.name?.trim() || "";
-  
-  
+
+
     if (!projectName) projectName = "Projet";
 
   const name =
@@ -80,7 +87,7 @@ export default async function ProjectResultsPage({ params }: PageProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <AccountMenu name={name} email={email} initial={initial} />
+            <AccountMenu name={name} email={email} initial={initial} isAdmin={isAdmin} />
             <LogoutButton iconOnly />
           </div>
         </div>

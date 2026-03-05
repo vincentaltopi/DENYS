@@ -31,6 +31,7 @@ export async function POST(req: Request) {
 
   const userId = user.id;
   const batchId = makeBatchId();
+  const isAdmin = user.app_metadata?.role === "admin";
 
   const { data, error } = await supabaseAdmin
     .from("projects")
@@ -39,8 +40,9 @@ export async function POST(req: Request) {
         user_id: userId,
         batch_id: batchId,
         status: "processing",
-        name, 
-        created_by_email: user.email ?? null
+        name,
+        created_by_email: user.email ?? null,
+        is_admin_project: isAdmin,
       },
     ])
     .select("id, batch_id, name")

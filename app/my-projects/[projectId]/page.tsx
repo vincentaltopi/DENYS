@@ -15,11 +15,12 @@ export default async function MyProjectDetailPage({
 
   if (!user) redirect("/");
 
+  const isAdmin = user.app_metadata?.role === "admin";
+
   const { data: project, error } = await supabase
     .from("projects")
-    .select("id, name, status, batch_id, created_at")
+    .select("id, name, status, batch_id, created_at, is_admin_project")
     .eq("id", params.projectId)
-    .eq("user_id", user.id)
     .maybeSingle();
 
   if (error) {
@@ -32,7 +33,9 @@ export default async function MyProjectDetailPage({
     );
   }
 
-  if (!project) notFound();
+  // Projet admin → accessible aux admins seulement
+  // Projet non-admin → accessible à tous
+  if (!project || (project.is_admin_project && !isAdmin)) notFound();
 
   return (
     <main className="min-h-screen bg-slate-50 p-6 text-slate-900">

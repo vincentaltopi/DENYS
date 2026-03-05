@@ -7,9 +7,10 @@ type AccountMenuProps = {
   name: string;
   email: string;
   initial: string;
+  isAdmin?: boolean;
 };
 
-export default function AccountMenu({ name, email, initial }: AccountMenuProps) {
+export default function AccountMenu({ name, email, initial, isAdmin }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -97,6 +98,19 @@ export default function AccountMenu({ name, email, initial }: AccountMenuProps) 
             Changer mon mot de passe
           </a>
 
+          {isAdmin && (
+            <>
+              <div className="h-px bg-emerald-950/10" />
+              <a
+                role="menuitem"
+                href="/admin"
+                className="block px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+                onClick={() => setOpen(false)}
+              >
+                Administration
+              </a>
+            </>
+          )}
 
         </div>
       )}

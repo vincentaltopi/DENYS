@@ -51,12 +51,20 @@ export default async function MyProjectsPage() {
   const email = user.email ?? "";
   const initial = name.charAt(0).toUpperCase();
 
-  // IMPORTANT: sélectionne la colonne owner (souvent user_id)
-  const { data: projects, error } = await supabase
+  const isAdmin = user.app_metadata?.role === "admin";
+
+  // Les admins voient tous les projets ; les non-admins ne voient pas les projets admin
+  let query = supabase
     .from("projects")
-    .select("id, name, status, created_at, created_by_email, user_id")
+    .select("id, name, status, created_at, created_by_email, user_id, is_admin_project")
     .is("archived_at", null)
     .order("created_at", { ascending: false });
+
+  if (!isAdmin) {
+    query = query.eq("is_admin_project", false);
+  }
+
+  const { data: projects, error } = await query;
 
   if (error) {
     return (
@@ -94,7 +102,7 @@ export default async function MyProjectsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <AccountMenu name={name} email={email} initial={initial} />
+            <AccountMenu name={name} email={email} initial={initial} isAdmin={isAdmin} />
             <LogoutButton iconOnly />
           </div>
         </div>
@@ -136,6 +144,7 @@ export default async function MyProjectsPage() {
                   key={project.id}
                   className={[
                     "relative rounded-xl border bg-white p-4 shadow-sm",
+                    project.is_admin_project ? "border-emerald-300" : "",
                     href
                       ? "transition hover:bg-slate-50"
                       : "opacity-60 cursor-not-allowed",
@@ -171,11 +180,18 @@ export default async function MyProjectsPage() {
                         </div>
                       </div>
 
-                      <span
-                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${statusUI.className}`}
-                      >
-                        {statusUI.label}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {isAdmin && project.is_admin_project && (
+                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 border border-emerald-200">
+                            Admin
+                          </span>
+                        )}
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${statusUI.className}`}
+                        >
+                          {statusUI.label}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

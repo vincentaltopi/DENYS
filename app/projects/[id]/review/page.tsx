@@ -28,11 +28,11 @@ export default async function ProjectReviewPage({ params }: PageProps) {
 
   
 
-    // Sécurité : on récupère le projet de CE user uniquement
-  // 1) Requête actuelle (id + user) — inchangée
+  const isAdmin = user.app_metadata?.role === "admin";
+
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id,name,user_id")
+    .select("id,name,user_id,is_admin_project")
     .eq("id", id)
     .maybeSingle();
 
@@ -40,6 +40,10 @@ export default async function ProjectReviewPage({ params }: PageProps) {
     console.error("Error fetching project name:", projectError.message);
   }
 
+  // Projet admin → accessible aux admins seulement
+  if (project?.is_admin_project && !isAdmin) {
+    redirect("/my-projects");
+  }
 
   // Fallback minimal: si le user client ne voit pas le projet, on lit en admin
   // MAIS on vérifie l'ownership avant d'utiliser le nom (sinon redirect menu).
@@ -87,7 +91,7 @@ export default async function ProjectReviewPage({ params }: PageProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <AccountMenu name={name} email={email} initial={initial} />
+            <AccountMenu name={name} email={email} initial={initial} isAdmin={isAdmin} />
             <LogoutButton iconOnly />
           </div>
         </div>
