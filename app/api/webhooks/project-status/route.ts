@@ -46,6 +46,7 @@ export async function POST(req: Request) {
       to: email,
       projectName,
       projectId,
+      errorMessage: record.error_message ?? undefined,
     }).catch((err) =>
       console.error("[webhook] Email send error (failed):", err)
     );

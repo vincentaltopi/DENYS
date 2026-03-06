@@ -1,11 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import AccountMenu from "@/components/AccountMenu";
-import LogoutButton from "@/components/LogoutButton";
-import { COLORS } from "@/app/chart.colors";
 import ProjectActions from "@/components/ProjectActions";
+import AppHeader from "@/components/AppHeader";
 
 function getStatusUI(status: string) {
   switch (status) {
@@ -23,6 +20,11 @@ function getStatusUI(status: string) {
       return {
         label: "Terminé",
         className: "bg-emerald-100 text-emerald-800 border border-emerald-200",
+      };
+    case "failed":
+      return {
+        label: "Échoué",
+        className: "bg-red-100 text-red-800 border border-red-200",
       };
     default:
       return {
@@ -42,21 +44,12 @@ export default async function MyProjectsPage() {
 
   if (userErr || !user) redirect("/");
 
-  const name =
-    (user.user_metadata?.full_name as string | undefined) ??
-    (user.user_metadata?.name as string | undefined) ??
-    user.email ??
-    "Utilisateur";
-
-  const email = user.email ?? "";
-  const initial = name.charAt(0).toUpperCase();
-
   const isAdmin = user.app_metadata?.role === "admin";
 
   // Les admins voient tous les projets ; les non-admins ne voient pas les projets admin
   let query = supabase
     .from("projects")
-    .select("id, name, status, created_at, created_by_email, user_id, is_admin_project")
+    .select("id, name, status, created_at, created_by_email, user_id, is_admin_project, error_message")
     .is("archived_at", null)
     .order("created_at", { ascending: false });
 
@@ -68,7 +61,7 @@ export default async function MyProjectsPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-slate-50 text-slate-900 p-6">
+      <main className="min-h-screen bg-white text-emerald-950 p-6">
         <p className="text-sm text-red-700">
           Erreur de chargement : {error.message}
         </p>
@@ -77,41 +70,13 @@ export default async function MyProjectsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Top bar */}
-      <header className="border-b border-emerald-700/30">
-        <div className="flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-10">
-            <Link href="/home" className="inline-flex items-center">
-              <Image
-                src="/images/LOGO_ALTOPI.png"
-                alt="Altopi"
-                width={120}
-                height={40}
-                priority
-                className="h-auto w-44 cursor-pointer"
-              />
-            </Link>
-
-            <div
-              className="text-xl font-normal"
-              style={{ color: COLORS.green_altopi }}
-            >
-              Évaluateur Carbone des Projets
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <AccountMenu name={name} email={email} initial={initial} isAdmin={isAdmin} />
-            <LogoutButton iconOnly />
-          </div>
-        </div>
-      </header>
+    <main className="min-h-screen bg-white text-emerald-950">
+      <AppHeader />
 
       {/* Content */}
-      <section className="mx-auto max-w-3xl px-6 py-6">
+      <section className="mx-auto max-w-3xl px-6 pt-10">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-medium">Mes projets</h1>
+          <h1 className="text-2xl font-medium tracking-tight">Mes projets</h1>
 
           <Link
             href="/upload"
@@ -145,8 +110,11 @@ export default async function MyProjectsPage() {
                   className={[
                     "relative rounded-xl border bg-white p-4 shadow-sm",
                     project.is_admin_project ? "border-emerald-300" : "",
+                    status === "failed" ? "border-red-200" : "",
                     href
                       ? "transition hover:bg-slate-50"
+                      : status === "failed"
+                      ? ""
                       : "opacity-60 cursor-not-allowed",
                   ].join(" ")}
                 >
@@ -194,6 +162,15 @@ export default async function MyProjectsPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Message d’erreur pour les projets échoués */}
+                  {status === "failed" && project.error_message && (
+                    <div className="relative z-10 pointer-events-none mt-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+                      <p className="text-xs text-red-700">
+                        {project.error_message}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Actions : au-dessus de l’overlay + cliquables */}
                   <div className="relative z-20 mt-3 flex items-center justify-end pointer-events-auto">
