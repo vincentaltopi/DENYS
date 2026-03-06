@@ -194,6 +194,7 @@ export default function ReviewPanel({ projectId }: ReviewPanelProps) {
 
   const [events, setEvents] = useState<ProjectEvent[]>([]);
 
+  const [initialLoading, setInitialLoading] = useState(true);
   const [finalizeError, setFinalizeError] = useState<string | null>(null);
   const [finalizeLoading, setFinalizeLoading] = useState(false);
 
@@ -650,6 +651,7 @@ useEffect(() => {
             if (cancelled) return;
             setResultsRows(rows);
             resultsLoadedOnceRef.current = true;
+            setInitialLoading(false);
           }
         }
 
@@ -689,7 +691,29 @@ useEffect(() => {
     ) : null}
 
 
-      {showResults && (
+      {showResults && initialLoading && (
+        <div className="space-y-3">
+          <div className="rounded-xl border bg-white p-3">
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="h-9 w-40 animate-pulse rounded-xl bg-emerald-950/10" />
+              <div className="h-9 w-56 animate-pulse rounded-xl bg-emerald-950/10" />
+              <div className="h-9 w-40 animate-pulse rounded-xl bg-emerald-950/5" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center gap-3 rounded-lg border border-emerald-950/5 p-3">
+                <div className="h-4 w-4 animate-pulse rounded bg-emerald-950/10" />
+                <div className="h-4 w-48 animate-pulse rounded bg-emerald-950/10" />
+                <div className="h-4 w-32 animate-pulse rounded bg-emerald-950/5" />
+                <div className="ml-auto h-4 w-20 animate-pulse rounded bg-emerald-950/10" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showResults && !initialLoading && (
         <>
           {/* CONTROLES (FILTRES UNIQUEMENT) */}
           <div className="rounded-xl border bg-white p-3">
