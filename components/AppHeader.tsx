@@ -24,7 +24,7 @@ export default async function AppHeader() {
   const isAdmin = user.app_metadata?.role === "admin";
 
   return (
-    <header className="border-b border-emerald-700/30">
+    <header className="relative z-20 border-b border-emerald-700/30">
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-10">
           <Link href="/home" className="inline-flex items-center">
