@@ -756,7 +756,7 @@ useEffect(() => {
                   setFilterStatut("all");
                   setFilterCategorie("all");
                 }}
-                className="rounded-xl border border-emerald-950/15 bg-white px-3 py-2 text-xs font-normal text-slate-600 hover:bg-emerald-50"
+                className="rounded-xl border border-emerald-950/15 bg-white px-3 py-2 text-xs font-normal text-slate-600 transition hover:bg-emerald-50 active:scale-[0.97]"
                 title="Réinitialiser les filtres"
               >
                 Réinitialiser les filtres
@@ -785,13 +785,13 @@ useEffect(() => {
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => setSelectionCmd({ type: "all", token: Date.now() })}
-                    className="rounded-lg border px-2 py-1 text-[11px]"
+                    className="rounded-lg border px-2 py-1 text-[11px] transition hover:bg-emerald-50 active:scale-[0.95]"
                   >
                     Tout sélectionner
                   </button>
                   <button
                     onClick={() => setSelectionCmd({ type: "none", token: Date.now() })}
-                    className="rounded-lg border px-2 py-1 text-[11px]"
+                    className="rounded-lg border px-2 py-1 text-[11px] transition hover:bg-emerald-50 active:scale-[0.95]"
                   >
                     Tout désélectionner
                   </button>
@@ -802,7 +802,7 @@ useEffect(() => {
                   <button
                     disabled={!selectedResults.length}
                     onClick={() => setVerifStatus(selectedResults, "Validée")}
-                    className="rounded-lg bg-emerald-800 px-2 py-1 text-[11px] text-white"
+                    className="rounded-lg bg-emerald-800 px-2 py-1 text-[11px] text-white transition hover:bg-emerald-900 active:scale-[0.95] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Marquer Validée
                   </button>
@@ -825,7 +825,7 @@ useEffect(() => {
             className={[
               "rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition",
               allVerified && !finalizeLoading
-                ? "bg-emerald-800 text-white hover:bg-emerald-900"
+                ? "bg-emerald-800 text-white hover:bg-emerald-900 active:scale-[0.97]"
                 : "bg-emerald-800/40 text-white/70 cursor-not-allowed",
             ].join(" ")}
             title={allVerified ? "Voir les résultats finaux" : "Valide toutes les lignes à vérifier pour continuer"}
@@ -844,7 +844,7 @@ useEffect(() => {
               <button
                 type="button"
                 onClick={closeRetryModal}
-                className="absolute right-3 top-3 rounded-lg p-1 text-emerald-950/60 hover:bg-emerald-100 hover:text-emerald-950"
+                className="absolute right-3 top-3 rounded-lg p-1 text-emerald-950/60 transition hover:bg-emerald-100 hover:text-emerald-950 active:scale-[0.9]"
                 aria-label="Fermer"
               >
                 ✕
@@ -974,10 +974,10 @@ useEffect(() => {
                       closeRetryModal();
                     }}
                     className={[
-                      "rounded-xl px-4 py-2 text-sm font-medium",
+                      "rounded-xl px-4 py-2 text-sm font-medium transition",
                       sendingRowId === retryDraft.rowId
                         ? "bg-emerald-300 text-emerald-700 cursor-not-allowed"
-                        : "bg-emerald-700 text-white hover:bg-emerald-800",
+                        : "bg-emerald-700 text-white hover:bg-emerald-800 active:scale-[0.97]",
                     ].join(" ")}
                   >
                     {sendingRowId === retryDraft.rowId ? "Envoi…" : "Relancer le calcul d'impact"}
@@ -992,7 +992,7 @@ useEffect(() => {
       <div className="mt-8 flex flex-wrap gap-3">
         <button
           onClick={() => router.push("/home")}
-          className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+          className="inline-flex items-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/80 shadow-sm transition hover:bg-emerald-50 active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
         >
           ← Retour à l’accueil
         </button>
@@ -1381,7 +1381,7 @@ function DataTable({
                             e.stopPropagation();
                             onRetry?.(id, row);
                           }}
-                          className="rounded-md border border-emerald-950/15 bg-white px-2 py-1 text-[11px] font-medium text-emerald-950/70 hover:bg-emerald-50"
+                          className="rounded-md border border-emerald-950/15 bg-white px-2 py-1 text-[11px] font-medium text-emerald-950/70 transition hover:bg-emerald-50 active:scale-[0.95]"
                           title="Ouvrir le détail / retraiter"
                         >
                           👁

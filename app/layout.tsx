@@ -18,6 +18,14 @@ export const metadata: Metadata = {
   description: "Évaluateur Carbone des Projets",
   icons: {
     icon: "/icon.png",
+    apple: "/icon.png",
+  },
+  openGraph: {
+    title: "Altopi",
+    description: "Évaluateur Carbone des Projets",
+    siteName: "Altopi",
+    type: "website",
+    images: [{ url: "/images/LOGO_ALTOPI.png" }],
   },
 };
 

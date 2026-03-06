@@ -11,7 +11,7 @@ export default function ConfirmPage() {
           <div className="mt-4">
             <a
               href="/"
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900"
+              className="inline-flex items-center justify-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900 active:scale-[0.97]"
             >
               Aller à la connexion
             </a>

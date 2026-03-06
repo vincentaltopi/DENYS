@@ -19,7 +19,7 @@ export default async function UploadPage() {
       <AppHeader />
 
       {/* Page content */}
-      <section className="mx-auto flex min-h-[calc(100vh-73px)] max-w-6xl items-start justify-center px-6 pt-10">
+      <section className="animate-fade-in-up mx-auto flex min-h-[calc(100vh-73px)] max-w-6xl items-start justify-center px-6 pt-10">
         <div className="w-full max-w-3xl">
           {/* Title */}
           <div className="mb-6">

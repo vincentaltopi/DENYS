@@ -22,7 +22,7 @@ export default async function AccountPage() {
       <AppHeader />
 
       {/* Page content */}
-      <section className="mx-auto max-w-6xl px-6 pt-10">
+      <section className="animate-fade-in-up mx-auto max-w-6xl px-6 pt-10">
         <div className="max-w-2xl">
           <div className="mb-6">
             <h1 className="text-2xl font-medium tracking-tight">Mon compte</h1>
@@ -43,13 +43,13 @@ export default async function AccountPage() {
               <div className="pt-2 flex flex-wrap gap-3">
                 <a
                   href="/forgot-password"
-                  className="inline-flex items-center justify-center rounded-xl bg-emerald-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-950"
+                  className="inline-flex items-center justify-center rounded-xl bg-emerald-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-950 active:scale-[0.97]"
                 >
                   Changer mon mot de passe
                 </a>
                 <a
                   href="/home"
-                  className="inline-flex items-center justify-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/70 hover:bg-emerald-50"
+                  className="inline-flex items-center justify-center rounded-xl border border-emerald-950/15 bg-white px-4 py-2 text-sm font-medium text-emerald-950/70 transition hover:bg-emerald-50 active:scale-[0.97]"
                 >
                   Retour
                 </a>

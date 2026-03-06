@@ -74,13 +74,13 @@ export default async function MyProjectsPage() {
       <AppHeader />
 
       {/* Content */}
-      <section className="mx-auto max-w-3xl px-6 pt-10">
+      <section className="animate-fade-in-up mx-auto max-w-3xl px-6 pt-10">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-medium tracking-tight">Mes projets</h1>
 
           <Link
             href="/upload"
-            className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+            className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-800 active:scale-[0.97]"
           >
             Nouveau projet
           </Link>
@@ -88,8 +88,14 @@ export default async function MyProjectsPage() {
 
         <div className="mt-6 space-y-3">
           {(projects ?? []).length === 0 ? (
-            <div className="rounded-xl border bg-white p-6 text-sm text-slate-600">
-              Aucun projet pour le moment.
+            <div className="flex flex-col items-center rounded-2xl border border-emerald-950/10 bg-white px-6 py-14 text-center shadow-sm">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                </svg>
+              </div>
+              <p className="text-base font-medium text-emerald-950">Aucun projet pour le moment</p>
+              <p className="mt-1 text-sm text-emerald-950/50">Créez votre premier projet pour commencer une évaluation carbone.</p>
             </div>
           ) : (
             projects!.map((project: any) => {

@@ -58,7 +58,7 @@ export default async function ProjectReviewPage({ params }: PageProps) {
       <AppHeader />
 
       {/* Content */}
-      <section className="mx-auto flex min-h-[calc(100vh-73px)] max-w-6xl items-start justify-center px-6 pt-10">
+      <section className="animate-fade-in-up mx-auto flex min-h-[calc(100vh-73px)] max-w-6xl items-start justify-center px-6 pt-10">
         <div className="w-full">
           <div className="mb-6 flex flex-col gap-2">
             <h1 className="text-3xl font-normal tracking-tight text-emerald-950">

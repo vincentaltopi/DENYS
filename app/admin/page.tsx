@@ -26,7 +26,7 @@ export default async function AdminPage() {
       <AppHeader />
 
       {/* Content */}
-      <section className="mx-auto max-w-4xl px-6 pt-10 space-y-8">
+      <section className="animate-fade-in-up mx-auto max-w-4xl px-6 pt-10 space-y-8">
         <h1 className="text-2xl font-medium tracking-tight">Administration</h1>
 
         {/* Invite card */}
