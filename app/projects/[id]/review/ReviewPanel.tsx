@@ -685,7 +685,7 @@ useEffect(() => {
     {data?.project?.status !== "ready" ? (
       <div className="rounded-xl border bg-white p-3">
         <div className="mb-2 text-sm font-medium text-emerald-950/80">
-          Traitement en cours…
+          Chargement des données…
         </div>
       </div>
     ) : null}
